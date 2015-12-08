@@ -7,6 +7,12 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+var remoteTypes = map[string]bool{
+	"main":       true,
+	"other":      true,
+	"subsection": true,
+}
+
 type Config struct {
 	ID        bson.ObjectId    `bson:"_id,omitempty" json:"id"`
 	AppID     string           `json:"appid"`
@@ -23,6 +29,28 @@ type ConfigSections struct {
 	Subsections []ConfigSections `json:"subsections" bson:"subsections,omitempty"`
 }
 
+func (c *Config) GetSections() []ConfigSections {
+	return c.Sections
+}
+
+func (c *Config) GetRemoteSections() []ConfigSections {
+	remoteSections := []ConfigSections{}
+
+	for _, row := range c.Sections {
+		if remoteTypes[row.Type] == true {
+			remoteSections = append(remoteSections, row)
+		}
+
+		for _, subrow := range row.Subsections {
+			if remoteTypes[subrow.Type] == true {
+				remoteSections = append(remoteSections, subrow)
+			}
+		}
+	}
+
+	return remoteSections
+}
+
 func (c *Config) Save(db *mgo.Database) {
 	collection := db.C("configs")
 	sectionsCollection := db.C("sections")
@@ -34,7 +62,7 @@ func (c *Config) Save(db *mgo.Database) {
 
 		err := sectionsCollection.Find(findSect).One(&sect)
 		if err != nil {
-			if *debugMode {
+			if debugMode {
 				log.Println("Could not find", findSect, err)
 				log.Println("Inserting ...")
 			}
@@ -60,7 +88,7 @@ func (c *Config) Save(db *mgo.Database) {
 
 				err = sectionsCollection.Find(findSect).One(&sect)
 				if err != nil {
-					if *debugMode {
+					if debugMode {
 						log.Println("Could not find", findSect, err)
 						log.Println("Inserting ...")
 					}
