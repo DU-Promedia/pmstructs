@@ -14,10 +14,10 @@ var remoteTypes = map[string]bool{
 }
 
 type Config struct {
-	ID        bson.ObjectId    `bson:"_id,omitempty" json:"id"`
+	ID        bson.ObjectId    `bson:"_id,omitempty" json:"mid"`
 	AppID     string           `json:"appid"`
 	Origin    string           `json:"origin" bson:"originhost"`
-	SectionID bson.ObjectId    `bson:"sectionid,omitempty" json:"mid"`
+	SectionID bson.ObjectId    `bson:"sectionid,omitempty" json:"-"`
 	Sections  []ConfigSections `json:"sections"`
 }
 
@@ -25,7 +25,7 @@ type ConfigSections struct {
 	Name        string           `json:"name"`
 	Url         string           `json:"url"`
 	Type        string           `json:"type"`
-	SectionID   bson.ObjectId    `json:"mid" bson:"sectionid,omitempty"`
+	SectionID   bson.ObjectId    `json:"id" bson:"sectionid,omitempty"`
 	Subsections []ConfigSections `json:"subsections" bson:"subsections,omitempty"`
 }
 
