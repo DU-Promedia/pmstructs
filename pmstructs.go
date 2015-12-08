@@ -9,6 +9,6 @@ var (
 )
 
 func main() {
-	debugMode = flag.Bool("debug", false, "Set grabberd to debug mode")
+	debugMode = flag.Bool("debug", false, "Set application to debug mode")
 	flag.Parse()
 }
