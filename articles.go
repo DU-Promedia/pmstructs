@@ -69,56 +69,10 @@ type Article struct {
 	Tags            []string           `json:"-" bson:"tags,omitempty"`
 	Video           ArticleVideo       `xml:"PicSearchVideo" bson:"video" json:"video"`
 	TopContent      string             `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent"`
-	Sections        []ArticleSection   `json:"sections" bson:"sections"`
 }
 
-/*
- * Article Public lists
- */
-/*
- * Complete article
- */
-type ArticleExport struct {
-	Id           bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-	OriginID     string        `xml:"id,attr" json:"id"`
-	OriginalLink string        `xml:"StandardArticleOriginalLink" json:"originallink"`
-	OriginSource string        `bson:"originsource" json:"originsource"`
-	Title        string        `xml:"StandardArticleTitle" json:"title"`
-	Subtitle     string        `xml:"StandardArticleSubTitle" json:"subtitle"`
-	// Supertitle      string             `xml:"StandardArticleSuperTitle" json:"supertitle"`
-	Preamble      string            `xml:"StandardArticlePreamble" json:"preamble"`
-	Body          string            `xml:"StandardArticleBody" json:"content"`
-	Image         string            `xml:"StandardArticleImage>StandardArticleImagePath" json:"image" bson:"image"`
-	ImageByline   string            `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline" bson:"imagebyline"`
-	ArticleImages []ArticleImage    `xml:"ArticleImages>ArticleImage" json:"articleimages" bson:"articleimages"`
-	ImageAlbum    ArticleImageAlbum `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum" bson:"imagealbum"`
-	Category      string            `xml:"StandardArticleCategory" json:"category"`
-	//ArticleType     string             `xml:"StandardArticleType" json:"articletype"`
-	//ArticleInfo     string             `xml:"StandardArticleInfo" json:"articleinfo"`
-	//PubdateRaw      string             `xml:"StandardArticlePubDate"`
-	//ModdateRaw      string             `xml:"StandardArticlePubModDate"`
-	Pubdate     time.Time          `json:"pubdate" bson:"pubdate"`
-	Moddate     time.Time          `json:"moddate" bson:"moddate"`
-	Location    string             `xml:"Location" json:"location"`
-	Latitude    string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude" bson:"latitude"`
-	Longitude   string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude" bson:"longitude"`
-	Department  string             `xml:"ArticleDepartment" json:"department"`
-	Teaser      ArticleTeaser      `xml:"StandardArticleTeaser" json:"teaser"`
-	ExtraTeaser ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" json:"extrateaser"`
-	Byline      []ArticleByline    `xml:"StandardArticleBylines>StandardArticleByline" json:"bylines"`
-	Links       []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks"`
-	//CommentsEnabled string             `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
-	//CommentsTitle   string             `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle"`
-	//Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments"`
-	//Facts           []ArticleFact      `xml:"StandardArticleFacts>StandardArticleFact" json:"facts"`
-	//BackgroundFacts []ArticleFact      `xml:"StandardArticleBackgroundFacts>StandardArticleBackgroundFact" json:"backgroundfacts"`
-	//Theme           string             `xml:"StandardArticleTheme" json:"-" bson:"theme"`
-	LastMod time.Time `json:"lastmod" bson:"lastmod"`
-	//ArticleTags     []string           `xml:"StandardArticleKeyWords>StandardArticleKeyWord" json:"articletags"`
-	//Tags            []string           `json:"-" bson:"tags,omitempty"`
-	Video ArticleVideo `xml:"PicSearchVideo" bson:"video" json:"video"`
-	//TopContent      string             `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent"`
-	Sections []ArticleSection `json:"sections" bson:"sections"`
+type ArticleRef struct {
+	ArticleID bson.ObjectId `bson:"articleid" json:"articleid"`
 }
 
 /* TODO: Fix WebPolls from XML
@@ -234,148 +188,43 @@ type ArticleListWrapper struct {
 }
 
 type ArticleList struct {
-	//XMLName  xml.Name      `xml:"MobileContentBlocks" bson:"-" json:"-"`
-	ID       bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-	OriginID string        `xml:"id,attr" bson:"originid" json:"id"`
-	Origin   string        `bson:"origin" json:"origin"`
-	Url      string        `json:"url" bson:"url"`
-	Articles []Article     `xml:"MobileContentBlock>StandardArticle" bson:"-" json:"-"`
+	ID          bson.ObjectId `bson:"_id,omitempty" json:"mid"`
+	OriginID    string        `xml:"id,attr" bson:"originid" json:"id"`
+	Origin      string        `bson:"origin" json:"origin"`
+	Url         string        `json:"url" bson:"url"`
+	Articles    []Article     `xml:"MobileContentBlock>StandardArticle" bson:"-" json:"-"`
+	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
 }
 
 type ArticleContentPlacement struct {
-	XMLName  xml.Name      `xml:"ContentPlacement" bson:"-"`
-	ID       bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-	OriginID string        `xml:"id,attr" bson:"originid" json:"id"`
-	Origin   string        `bson:"origin" json:"origin"`
-	Url      string        `json:"url" bson:"url"`
-	Articles []Article     `xml:"StandardArticle" bson:"-"`
+	XMLName     xml.Name      `xml:"ContentPlacement" bson:"-"`
+	ID          bson.ObjectId `bson:"_id,omitempty" json:"mid"`
+	OriginID    string        `xml:"id,attr" bson:"originid" json:"id"`
+	Origin      string        `bson:"origin" json:"origin"`
+	Url         string        `json:"url" bson:"url"`
+	Articles    []Article     `xml:"StandardArticle" bson:"-"`
+	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
 }
 
 type ArticleStatisticsList struct {
-	XMLName  xml.Name      `xml:"StatisticsList" bson:"-" json:"-"`
-	ID       bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-	OriginID string        `xml:"id,attr" bson:"originid" json:"id"`
-	Origin   string        `bson:"origin" json:"origin"`
-	Url      string        `json:"url" bson:"url"`
-	Articles []Article     `xml:"List>ListItem>StandardArticle" bson:"-" json:"-"`
+	XMLName     xml.Name      `xml:"StatisticsList" bson:"-" json:"-"`
+	ID          bson.ObjectId `bson:"_id,omitempty" json:"mid"`
+	OriginID    string        `xml:"id,attr" bson:"originid" json:"id"`
+	Origin      string        `bson:"origin" json:"origin"`
+	Url         string        `json:"url" bson:"url"`
+	Articles    []Article     `xml:"List>ListItem>StandardArticle" bson:"-" json:"-"`
+	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
 }
-
-// type ArticleLatestNewsListWrapper struct {
-// 	XMLName xml.Name                `xml:"LatestNewsListWrapper" bson:"-" json:"-"`
-// 	Url     string                  `bson:"-" json:"-" xml:"-"`
-// 	Lists   []ArticleLatestNewsList `xml:"LatestNewsList" bson:"-" json:"-"`
-// }
-
-// type ArticleLatestNewsList struct {
-// 	ID       bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-// 	OriginID string        `xml:"id,attr" json:"id" bson:"originid"`
-// 	Origin   string        `bson:"origin" json:"origin"`
-// 	Url      string        `bson:"url" json:"url"`
-// 	Articles []Article     `xml:"LatestNewsItem>StandardArticle" bson:"-" json:"-"`
-// }
-
-/*
- * AKA: Sections
- */
-type ArticleListCommon struct {
-	ID        bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-	OriginID  string        `bson:"originid" json:"id"`
-	Origin    string        `bson:"origin" json:"origin"`
-	OriginApp string        `bson:"originapp" json:"-"`
-	Url       string        `json:"url" bson:"url"`
-	Articles  []Article     `json:"articles" bson:"articles"`
-}
-
-func (a *ArticleListCommon) Save(db *mgo.Database) {
-	if len(a.Url) == 0 {
-		log.Println("ArticleListCommon Save: No url given. Needs it to find")
-		return
-	}
-
-	coll := db.C("sections")
-
-	findQuery := bson.M{"url": a.Url}
-	err := coll.Insert(a)
-	if err != nil {
-		err = coll.Update(findQuery, a)
-		if err != nil {
-			log.Println("ArticleListCommon Save: Could not insert or save section")
-			return
-		}
-
-		return
-	}
-
-	return
-}
-
-func (a *ArticleListCommon) LoadArticles(articleCollection *mgo.Collection) {
-	findQuery := bson.M{"sections": bson.M{"$elemMatch": bson.M{"sectionid": a.ID}}}
-
-	if err := articleCollection.Find(findQuery).All(&a.Articles); err != nil {
-		log.Println("Failed to get articles for section")
-		return
-	}
-}
-
-func (a *ArticleListCommon) GetLatestArticles(db *mgo.Database, limit int) error {
-	artCol := db.C("articles")
-
-	findQuery := bson.M{"originsource": a.Origin}
-
-	err := artCol.Find(findQuery).Sort("-pubdate").Limit(limit).All(&a.Articles)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (a *ArticleListCommon) LoadFromDB(db *mgo.Database) {
-	if len(a.Url) == 0 {
-		log.Println("ArticleListCommon LoadFromDB: Add an url")
-		return
-	}
-
-	secCol := db.C("sections")
-
-	findQuery := bson.M{"url": a.Url}
-	err := secCol.Find(findQuery).One(&a)
-	if err != nil {
-		log.Println("ArticleListCommon LoadFromDB: Could not load from db:", err)
-		return
-	}
-
-	return
-}
-
-/*
- * Latest news List wrapper
- */
-
-// func (list *ArticleLatestNewsListWrapper) SaveToDB(db *mgo.Database) {
-// 	for _, l := range list.Lists {
-// 		l.Url = list.Url
-// 		l.SaveToDB(db)
-// 	}
-// }
-
-// func (a *ArticleLatestNewsList) Save(db *mgo.Database) {
-// 	secCol := db.C("sections")
-
-// 	parseUrl, _ :=
-// }
-
-// func (list *ArticleLatestNewsList) SaveToDB(db *mgo.Database) {
-
-// }
 
 /*
  * ContentPlacements
  */
-func (list *ArticleContentPlacement) Save(sectionCollection *mgo.Collection) {
+func (list *ArticleContentPlacement) Save(db *mgo.Database) {
+	sectionCollection := db.C("sections")
+
 	// Index should be unique by originid so we should be safe
 	parseUrl, _ := url.Parse(list.Url)
+
 	list.Origin = parseUrl.Host
 	oldArticles := list.Articles
 
@@ -388,24 +237,28 @@ func (list *ArticleContentPlacement) Save(sectionCollection *mgo.Collection) {
 	list.Articles = oldArticles
 }
 
-func (list *ArticleContentPlacement) SaveToDB(articleCollection *mgo.Collection, sectionCollection *mgo.Collection) {
+func (list *ArticleContentPlacement) SaveToDB(db *mgo.Database) {
 
 	// Save to db
-	list.Save(sectionCollection)
+	list.Save(db)
 
-	i := 1
+	i := 0
 
 	for _, a := range list.Articles {
+		i++
 
 		sect := ArticleSection{}
 		sect.SectionID = list.ID
 		sect.Placement = i
 
-		a.SaveToDB(articleCollection)
-		a.UpdateSection(articleCollection, sect)
+		a.SaveToDB(db)
 
-		i++
+		artRef := ArticleRef{}
+		artRef.ArticleID = a.Id
+		list.ArticleList = append(list.ArticleList, artRef)
 	}
+
+	list.Save(db)
 }
 
 func (list *ArticleContentPlacement) GetArticles() []Article {
@@ -423,7 +276,9 @@ func (list *ArticleContentPlacement) GetArticles() []Article {
 /*
  * StatisticsList
  */
-func (list *ArticleStatisticsList) Save(sectionCollection *mgo.Collection) {
+func (list *ArticleStatisticsList) Save(db *mgo.Database) {
+	sectionCollection := db.C("sections")
+
 	// Index should be unique by originid so we should be safe
 	parseUrl, _ := url.Parse(list.Url)
 	list.Origin = parseUrl.Host
@@ -438,10 +293,10 @@ func (list *ArticleStatisticsList) Save(sectionCollection *mgo.Collection) {
 	list.Articles = oldArticles
 }
 
-func (list *ArticleStatisticsList) SaveToDB(articleCollection *mgo.Collection, sectionCollection *mgo.Collection) {
+func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
 
 	// Save section
-	list.Save(sectionCollection)
+	list.Save(db)
 
 	i := 0
 
@@ -452,9 +307,14 @@ func (list *ArticleStatisticsList) SaveToDB(articleCollection *mgo.Collection, s
 		sect.SectionID = list.ID
 		sect.Placement = i
 
-		a.SaveToDB(articleCollection)
-		a.UpdateSection(articleCollection, sect)
+		a.SaveToDB(db)
+
+		artRef := ArticleRef{}
+		artRef.ArticleID = a.Id
+		list.ArticleList = append(list.ArticleList, artRef)
 	}
+
+	list.Save(db)
 }
 
 func (list *ArticleStatisticsList) GetArticles() []Article {
@@ -472,7 +332,9 @@ func (list *ArticleStatisticsList) GetArticles() []Article {
 /*
  * Article list
  */
-func (list *ArticleList) Save(sectionCollection *mgo.Collection) {
+func (list *ArticleList) Save(db *mgo.Database) {
+	sectionCollection := db.C("sections")
+
 	// Index should be unique by originid so we should be safe
 	parseUrl, _ := url.Parse(list.Url)
 	list.Origin = parseUrl.Host
@@ -487,9 +349,9 @@ func (list *ArticleList) Save(sectionCollection *mgo.Collection) {
 	list.Articles = oldArticles
 }
 
-func (list *ArticleList) SaveToDB(articleCollection *mgo.Collection, sectionCollection *mgo.Collection) {
+func (list *ArticleList) SaveToDB(db *mgo.Database) {
 
-	list.Save(sectionCollection)
+	list.Save(db)
 
 	i := 0
 
@@ -500,10 +362,14 @@ func (list *ArticleList) SaveToDB(articleCollection *mgo.Collection, sectionColl
 		sect.SectionID = list.ID
 		sect.Placement = i
 
-		a.SaveToDB(articleCollection)
-		a.UpdateSection(articleCollection, sect)
+		a.SaveToDB(db)
+
+		artRef := ArticleRef{}
+		artRef.ArticleID = a.Id
+		list.ArticleList = append(list.ArticleList, artRef)
 	}
 
+	list.Save(db)
 }
 
 func (list *ArticleList) GetArticles() []Article {
@@ -519,7 +385,9 @@ func (list *ArticleList) GetArticles() []Article {
 /*
  * Article
  */
-func (a *Article) SaveToDB(collection *mgo.Collection) {
+func (a *Article) SaveToDB(db *mgo.Database) {
+	collection := db.C("articles")
+
 	a.LastMod = time.Now()
 	a.Pubdate, _ = time.Parse(time.RFC1123Z, a.PubdateRaw)
 	a.Moddate, _ = time.Parse(time.RFC1123Z, a.ModdateRaw)
@@ -541,14 +409,18 @@ func (a *Article) SaveToDB(collection *mgo.Collection) {
 
 	// Fields that we set somewhere else ...
 	a.Tags = savedArticle.Tags
-	a.Sections = savedArticle.Sections
 
 	if err = collection.Update(docToUpdate, a); err != nil {
 		log.Println("Article SaveToDB: Could not update:", err)
+		return
 	}
+
+	collection.Find(docToUpdate).One(&a)
 }
 
-func (a *Article) UpdateTags(collection *mgo.Collection) {
+func (a *Article) UpdateTags(db *mgo.Database) {
+	collection := db.C("articles")
+
 	a.LastMod = time.Now()
 
 	// Find document
@@ -557,32 +429,4 @@ func (a *Article) UpdateTags(collection *mgo.Collection) {
 	if err := collection.Update(docToUpdate, a); err != nil {
 		log.Println("Article UpdateTags: Could not update:", err)
 	}
-}
-
-func (a *Article) UpdateSection(collection *mgo.Collection, sect ArticleSection) {
-	// Find sections to update
-
-	if sect.Placement < 1 {
-		if debugMode {
-			log.Println("No placement for ArticleSection")
-		}
-		return
-	}
-
-	foundSect := false
-
-	for _, s := range a.Sections {
-		if sect.SectionID == s.SectionID {
-			s.Placement = sect.Placement
-			foundSect = true
-		}
-	}
-
-	if foundSect == false {
-		a.Sections = append(a.Sections, sect)
-	}
-
-	docToUpdate := bson.M{"originid": a.OriginID}
-	a.LastMod = time.Now()
-	collection.Update(docToUpdate, a)
 }
