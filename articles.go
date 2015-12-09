@@ -260,12 +260,53 @@ type ArticleStatisticsList struct {
 	Articles []Article     `xml:"List>ListItem>StandardArticle" bson:"-" json:"-"`
 }
 
+// type ArticleLatestNewsListWrapper struct {
+// 	XMLName xml.Name                `xml:"LatestNewsListWrapper" bson:"-" json:"-"`
+// 	Url     string                  `bson:"-" json:"-" xml:"-"`
+// 	Lists   []ArticleLatestNewsList `xml:"LatestNewsList" bson:"-" json:"-"`
+// }
+
+// type ArticleLatestNewsList struct {
+// 	ID       bson.ObjectId `bson:"_id,omitempty" json:"mid"`
+// 	OriginID string        `xml:"id,attr" json:"id" bson:"originid"`
+// 	Origin   string        `bson:"origin" json:"origin"`
+// 	Url      string        `bson:"url" json:"url"`
+// 	Articles []Article     `xml:"LatestNewsItem>StandardArticle" bson:"-" json:"-"`
+// }
+
+/*
+ * AKA: Sections
+ */
 type ArticleListCommon struct {
-	ID       bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-	OriginID string        `bson:"originid" json:"id"`
-	Origin   string        `bson:"origin" json:"origin"`
-	Url      string        `json:"url" bson:"url"`
-	Articles []Article     `json:"-" bson:"-"`
+	ID        bson.ObjectId `bson:"_id,omitempty" json:"mid"`
+	OriginID  string        `bson:"originid" json:"id"`
+	Origin    string        `bson:"origin" json:"origin"`
+	OriginApp string        `bson:"originapp" json:"-"`
+	Url       string        `json:"url" bson:"url"`
+	Articles  []Article     `json:"articles" bson:"articles"`
+}
+
+func (a *ArticleListCommon) Save(db *mgo.Database) {
+	if len(a.Url) == 0 {
+		log.Println("ArticleListCommon Save: No url given. Needs it to find")
+		return
+	}
+
+	coll := db.C("sections")
+
+	findQuery := bson.M{"url": a.Url}
+	err := coll.Insert(a)
+	if err != nil {
+		err = coll.Update(findQuery, a)
+		if err != nil {
+			log.Println("ArticleListCommon Save: Could not insert or save section")
+			return
+		}
+
+		return
+	}
+
+	return
 }
 
 func (a *ArticleListCommon) LoadArticles(articleCollection *mgo.Collection) {
@@ -276,6 +317,58 @@ func (a *ArticleListCommon) LoadArticles(articleCollection *mgo.Collection) {
 		return
 	}
 }
+
+func (a *ArticleListCommon) GetLatestArticles(db *mgo.Database, limit int) error {
+	artCol := db.C("articles")
+
+	findQuery := bson.M{"originsource": a.Origin}
+
+	err := artCol.Find(findQuery).Sort("-pubdate").Limit(limit).All(&a.Articles)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *ArticleListCommon) LoadFromDB(db *mgo.Database) {
+	if len(a.Url) == 0 {
+		log.Println("ArticleListCommon LoadFromDB: Add an url")
+		return
+	}
+
+	secCol := db.C("sections")
+
+	findQuery := bson.M{"url": a.Url}
+	err := secCol.Find(findQuery).One(&a)
+	if err != nil {
+		log.Println("ArticleListCommon LoadFromDB: Could not load from db:", err)
+		return
+	}
+
+	return
+}
+
+/*
+ * Latest news List wrapper
+ */
+
+// func (list *ArticleLatestNewsListWrapper) SaveToDB(db *mgo.Database) {
+// 	for _, l := range list.Lists {
+// 		l.Url = list.Url
+// 		l.SaveToDB(db)
+// 	}
+// }
+
+// func (a *ArticleLatestNewsList) Save(db *mgo.Database) {
+// 	secCol := db.C("sections")
+
+// 	parseUrl, _ :=
+// }
+
+// func (list *ArticleLatestNewsList) SaveToDB(db *mgo.Database) {
+
+// }
 
 /*
  * ContentPlacements

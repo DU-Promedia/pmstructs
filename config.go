@@ -51,6 +51,24 @@ func (c *Config) GetRemoteSections() []ConfigSections {
 	return remoteSections
 }
 
+func (c *Config) GetSectionsWithTypeOf(typeof string) []ConfigSections {
+	sects := []ConfigSections{}
+
+	for _, sect := range c.Sections {
+		if sect.Type == typeof {
+			sects = append(sects, sect)
+		}
+
+		for _, subsect := range sect.Subsections {
+			if subsect.Type == typeof {
+				sects = append(sects, subsect)
+			}
+		}
+	}
+
+	return sects
+}
+
 func (c *Config) Save(db *mgo.Database) {
 	collection := db.C("configs")
 	sectionsCollection := db.C("sections")
@@ -69,8 +87,10 @@ func (c *Config) Save(db *mgo.Database) {
 
 			insect := ArticleListCommon{}
 			insect.Origin = c.Origin
+			insect.OriginApp = c.AppID
 			insect.Url = x.Url
 
+			//sectionsCollection.Upsert(findSect, insect)
 			err = sectionsCollection.Insert(insect)
 			if err != nil {
 				log.Println(err)
@@ -95,6 +115,7 @@ func (c *Config) Save(db *mgo.Database) {
 
 					insect := ArticleListCommon{}
 					insect.Origin = c.Origin
+					insect.OriginApp = c.AppID
 					insect.Url = y.Url
 
 					err = sectionsCollection.Insert(insect)
