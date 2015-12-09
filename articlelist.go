@@ -17,7 +17,7 @@ type ArticleListCommon struct {
 	OriginApp   string        `bson:"originapp" json:"-"`
 	Url         string        `json:"url" bson:"url"`
 	Articles    []Article     `json:"articles" bson:"-"`
-	ArticleList []ArticleRef  `bson:"articles" json:"-"`
+	ArticleList []ArticleRef  `bson:"articlelist" json:"-"`
 }
 
 type ArticleListCommonCache struct {
