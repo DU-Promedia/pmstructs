@@ -261,7 +261,6 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 		err = sectCol.Find(findSections).All(&sects)
 		if err != nil {
 			log.Println("Article SaveToDB: Found no sections:", err)
-			log.Fatal(a)
 		} else {
 			// Reset sections, janitor should remove old articles
 			a.Sections = []ArticleSection{}
