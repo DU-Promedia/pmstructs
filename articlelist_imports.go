@@ -76,15 +76,13 @@ func (list *ArticleContentPlacement) SaveToDB(db *mgo.Database) {
 	for _, a := range list.Articles {
 		i++
 
-		sect := ArticleSection{}
-		sect.SectionID = list.ID
-		sect.Placement = i
-
 		a.SaveToDB(db)
 
 		artRef := ArticleRef{}
 		artRef.ArticleID = a.Id
 		list.ArticleList = append(list.ArticleList, artRef)
+
+		a.SaveToDB(db)
 	}
 
 	list.Save(db)
@@ -132,15 +130,13 @@ func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
 	for _, a := range list.Articles {
 		i++
 
-		sect := ArticleSection{}
-		sect.SectionID = list.ID
-		sect.Placement = i
-
 		a.SaveToDB(db)
 
 		artRef := ArticleRef{}
 		artRef.ArticleID = a.Id
 		list.ArticleList = append(list.ArticleList, artRef)
+
+		a.SaveToDB(db)
 	}
 
 	list.Save(db)
@@ -187,15 +183,13 @@ func (list *ArticleList) SaveToDB(db *mgo.Database) {
 	for _, a := range list.Articles {
 		i++
 
-		sect := ArticleSection{}
-		sect.SectionID = list.ID
-		sect.Placement = i
-
 		a.SaveToDB(db)
 
 		artRef := ArticleRef{}
 		artRef.ArticleID = a.Id
 		list.ArticleList = append(list.ArticleList, artRef)
+
+		a.SaveToDB(db)
 	}
 
 	list.Save(db)
