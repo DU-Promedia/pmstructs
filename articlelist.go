@@ -1,6 +1,7 @@
 package pmstructs
 
 import (
+	//"encoding/json"
 	"log"
 
 	"gopkg.in/mgo.v2"
@@ -39,15 +40,20 @@ func (a *ArticleListCommon) Save(db *mgo.Database) {
 	coll := db.C("sections")
 
 	findQuery := bson.M{"url": a.Url}
-	err := coll.Insert(a)
+	savedList := ArticleListCommon{}
+
+	err := coll.Find(findQuery).One(&savedList)
 	if err != nil {
+		// Insert it
+		err = coll.Insert(a)
+		if err != nil {
+			log.Println("ArticleListCommon Save: No insert:", err)
+		}
+	} else {
 		err = coll.Update(findQuery, a)
 		if err != nil {
-			log.Println("ArticleListCommon Save: Could not insert or save section")
-			return
+			log.Println("ArticleListCommon Save: No update:", err)
 		}
-
-		return
 	}
 
 	return
@@ -118,14 +124,21 @@ func (a *ArticleListCommon) SaveCached(db *mgo.Database) {
 	cache.Url = a.Url
 	cache.Articles = a.Articles
 
-	err := cacheCol.Insert(cache)
+	findQuery := bson.M{"sectionid": cache.SectionID}
+	savedList := ArticleListCommon{}
+	err := cacheCol.Find(findQuery).One(&savedList)
 	if err != nil {
-		// Should update then
-		findQuery := bson.M{"sectionid": cache.SectionID}
-		err = cacheCol.Update(findQuery, cache)
+		// Do an insert
+		err = cacheCol.Insert(cache)
 		if err != nil {
-			log.Println("ArticleListCommon SaveCached: Could not insert or update:", err)
+			log.Println("ArticleListCommon SaveCached: No insert:", err)
 		}
+		return
+	}
+
+	err = cacheCol.Update(findQuery, cache)
+	if err != nil {
+		log.Println("ArticleListCommon SaveCached: Could not insert or update:", err)
 	}
 
 }
