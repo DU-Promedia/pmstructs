@@ -97,6 +97,8 @@ func (list *ArticleContentPlacement) SaveToDB(db *mgo.Database) {
 
 	i := 0
 
+	list.ArticleList = []ArticleRef{}
+
 	for _, a := range list.Articles {
 		i++
 
@@ -169,6 +171,8 @@ func (list *ArticleList) SaveToDB(db *mgo.Database) {
 
 	i := 0
 
+	list.ArticleList = []ArticleRef{}
+
 	for _, a := range list.Articles {
 		i++
 
@@ -238,6 +242,8 @@ func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
 	list.Save(db)
 
 	i := 0
+
+	list.ArticleList = []ArticleRef{}
 
 	for _, a := range list.Articles {
 		i++
