@@ -3,8 +3,10 @@ package pmstructs
 import (
 	"log"
 	"net/url"
+	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -22,15 +24,16 @@ type Article struct {
 	Supertitle      string             `xml:"StandardArticleSuperTitle" json:"supertitle"`
 	Preamble        string             `xml:"StandardArticlePreamble" json:"preamble"`
 	Body            string             `xml:"StandardArticleBody" json:"content"`
+	BodyParts       []string           `bson:"contentparts" json:"contentparts"`
 	Image           string             `xml:"StandardArticleImage>StandardArticleImagePath" json:"image" bson:"image"`
 	ImageByline     string             `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline" bson:"imagebyline"`
 	ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages" bson:"articleimages"`
 	ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum" bson:"imagealbum"`
 	Category        string             `xml:"StandardArticleCategory" json:"category"`
-	ArticleType     string             `xml:"StandardArticleType" json:"articletype"`
-	ArticleInfo     string             `xml:"StandardArticleInfo" json:"articleinfo"`
-	PubdateRaw      string             `xml:"StandardArticlePubDate"`
-	ModdateRaw      string             `xml:"StandardArticlePubModDate"`
+	ArticleType     string             `xml:"StandardArticleType" bson:"articletype" json:"-"`
+	ArticleInfo     string             `xml:"StandardArticleInfo" bson:"articleinfo" json:"-"`
+	PubdateRaw      string             `xml:"StandardArticlePubDate" json:"-"`
+	ModdateRaw      string             `xml:"StandardArticlePubModDate" json:"-"`
 	Pubdate         time.Time          `json:"pubdate" bson:"pubdate"`
 	Moddate         time.Time          `json:"moddate" bson:"moddate"`
 	Location        string             `xml:"Location" json:"location"`
@@ -59,37 +62,37 @@ type Article struct {
  * Complete article
  */
 type ArticleExport struct {
-	Id              bson.ObjectId      `bson:"_id,omitempty" json:"mid"`
-	OriginID        string             `xml:"id,attr" json:"id"`
-	OriginalLink    string             `xml:"StandardArticleOriginalLink" json:"originallink"`
-	OriginSource    string             `bson:"originsource" json:"originsource"`
-	Title           string             `xml:"StandardArticleTitle" json:"title"`
-	Subtitle        string             `xml:"StandardArticleSubTitle" json:"subtitle"`
-	Preamble        string             `xml:"StandardArticlePreamble" json:"preamble"`
-	Body            string             `xml:"StandardArticleBody" json:"content"`
-	Image           string             `xml:"StandardArticleImage>StandardArticleImagePath" json:"image" bson:"image"`
-	ImageByline     string             `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline" bson:"imagebyline"`
-	ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages" bson:"articleimages"`
-	ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum" bson:"imagealbum"`
-	Category        string             `xml:"StandardArticleCategory" json:"category"`
-	Pubdate         time.Time          `json:"pubdate" bson:"pubdate"`
-	Moddate         time.Time          `json:"moddate" bson:"moddate"`
-	Location        string             `xml:"Location" json:"location"`
-	Latitude        string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude" bson:"latitude"`
-	Longitude       string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude" bson:"longitude"`
-	Department      string             `xml:"ArticleDepartment" json:"department"`
-	Teaser          ArticleTeaser      `xml:"StandardArticleTeaser" json:"teaser"`
-	ExtraTeaser     ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" json:"extrateaser"`
-	Byline          []ArticleByline    `xml:"StandardArticleBylines>StandardArticleByline" json:"bylines"`
-	Links           []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks"`
-	CommentsEnabled string             `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
-	CommentsTitle   string             `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle"`
-	Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments"`
-	Facts           []ArticleFact      `xml:"StandardArticleFacts>StandardArticleFact" json:"facts"`
-	BackgroundFacts []ArticleFact      `xml:"StandardArticleBackgroundFacts>StandardArticleBackgroundFact" json:"backgroundfacts"`
-	LastMod         time.Time          `json:"lastmod" bson:"lastmod"`
-	Video           ArticleVideo       `xml:"PicSearchVideo" bson:"video" json:"video"`
-	TopContent      string             `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent"`
+	Id           bson.ObjectId `bson:"_id,omitempty" json:"mid"`
+	OriginID     string        `xml:"id,attr" json:"id"`
+	OriginalLink string        `xml:"StandardArticleOriginalLink" json:"originallink"`
+	OriginSource string        `bson:"originsource" json:"originsource"`
+	Title        string        `xml:"StandardArticleTitle" json:"title"`
+	Subtitle     string        `xml:"StandardArticleSubTitle" json:"subtitle"`
+	Preamble     string        `xml:"StandardArticlePreamble" json:"preamble"`
+	Body         string        `xml:"StandardArticleBody" json:"content"`
+	Image        string        `xml:"StandardArticleImage>StandardArticleImagePath" json:"image" bson:"image"`
+	ImageByline  string        `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline" bson:"imagebyline"`
+	//ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages" bson:"articleimages"`
+	//ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum" bson:"imagealbum"`
+	Category    string             `xml:"StandardArticleCategory" json:"category" bson:"category"`
+	Pubdate     time.Time          `json:"pubdate" bson:"pubdate"`
+	Moddate     time.Time          `json:"moddate" bson:"moddate"`
+	Location    string             `xml:"Location" json:"location" bson:"location"`
+	Latitude    string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude" bson:"latitude"`
+	Longitude   string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude" bson:"longitude"`
+	Department  string             `xml:"ArticleDepartment" json:"department"`
+	Teaser      ArticleTeaser      `xml:"StandardArticleTeaser" json:"teaser"`
+	ExtraTeaser ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" json:"extrateaser"`
+	Byline      []ArticleByline    `xml:"StandardArticleBylines>StandardArticleByline" json:"bylines"`
+	//Links           []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks"`
+	CommentsEnabled string `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
+	CommentsTitle   string `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle"`
+	//Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments"`
+	//Facts           []ArticleFact      `xml:"StandardArticleFacts>StandardArticleFact" json:"facts"`
+	//BackgroundFacts []ArticleFact      `xml:"StandardArticleBackgroundFacts>StandardArticleBackgroundFact" json:"backgroundfacts"`
+	LastMod    time.Time    `json:"lastmod" bson:"lastmod"`
+	Video      ArticleVideo `xml:"PicSearchVideo" bson:"video" json:"video"`
+	TopContent string       `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent"`
 }
 
 /*
@@ -249,6 +252,7 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 
 	// Fields that we set somewhere else ...
 	a.Tags = savedArticle.Tags
+
 	if len(a.Id) == 0 {
 		a.Id = savedArticle.Id
 	}
@@ -282,6 +286,23 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 
 				a.Sections = append(a.Sections, aSect)
 			}
+		}
+	}
+
+	// Parse body!
+	rr := strings.NewReader(a.Body)
+	doc, err := goquery.NewDocumentFromReader(rr)
+	if err != nil {
+		log.Println("Could not read article body")
+	} else {
+		bodyParts := []string{}
+		doc.Find("p").Each(func(i int, s *goquery.Selection) {
+			html, _ := s.Html()
+			bodyParts = append(bodyParts, html)
+		})
+
+		if len(bodyParts) > 0 {
+			a.BodyParts = bodyParts
 		}
 	}
 

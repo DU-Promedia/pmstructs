@@ -13,6 +13,10 @@ var remoteTypes = map[string]bool{
 	"subsection": true,
 }
 
+type ConfigList struct {
+	Configs []Config
+}
+
 type Config struct {
 	ID        bson.ObjectId    `bson:"_id,omitempty" json:"mid"`
 	AppID     string           `json:"appid"`
