@@ -56,6 +56,7 @@ type Article struct {
 	Video           ArticleVideo       `xml:"PicSearchVideo" bson:"video" json:"video"`
 	TopContent      string             `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent"`
 	Sections        []ArticleSection   `bson:"sections" json:"sections"`
+	Shares          ArticleShares      `bson:"shares,omitempty" json:"shares,omitempty"`
 }
 
 /*
@@ -258,19 +259,29 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 
 	err := collection.Find(docToUpdate).One(&savedArticle)
 	if err != nil {
-		if debugMode {
-			log.Println("Found no document to update, inserting")
+		log.Println("Found no document to update, inserting:")
+
+		err = collection.Insert(a)
+		if err != nil {
+			log.Println("Article SaveToDB: On insert error:", err)
+			return
 		}
-		collection.Insert(a)
+
 		// Populate from db (so we get the id)
-		collection.Find(docToUpdate).One(&a)
+		err = collection.Find(docToUpdate).One(&savedArticle)
+		if err != nil {
+			log.Println("Found no document to work with:", err)
+			return
+		}
 	}
 
 	// Fields that we set somewhere else ...
 	a.Tags = savedArticle.Tags
 
 	if len(a.Id) == 0 {
-		a.Id = savedArticle.Id
+		if len(savedArticle.Id) > 0 {
+			a.Id = savedArticle.Id
+		}
 	}
 
 	if len(a.Id) > 0 {
