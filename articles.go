@@ -123,8 +123,24 @@ type ArticlePoll struct {
 }
 
 /*
- * Articles section struct
+ * Saving Article Ref and shares
 */
+
+type ArticleShares struct {
+	Id        bson.ObjectId `bson:"_id,omitempty" json:"id"`
+	ArticleID bson.ObjectId `bson:"articleid" json:"articleid"`
+	Date      time.Time     `bson:"date" json:"date"`
+	FB        struct {
+		Shares int `bson:"shares" json:"shares"`
+	} `bson:"fb" json:"fb"`
+	Twitter struct {
+		Shares int `bson:"shares" json:"shares"`
+	} `bson:"twitter" json:"twitter"`
+}
+
+/*
+ * Articles section struct
+ */
 type ArticleSection struct {
 	SectionID bson.ObjectId `json:"id" bson:"sectionid"`
 	Placement int           `json:"placement" bson:"placement"`
