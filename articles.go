@@ -130,6 +130,7 @@ type ArticlePoll struct {
 type ArticleShares struct {
 	Id        bson.ObjectId `bson:"_id,omitempty" json:"id"`
 	ArticleID bson.ObjectId `bson:"articleid" json:"articleid"`
+	Origin    string        `bson:"origin" json:"origin"`
 	Date      time.Time     `bson:"date" json:"date"`
 	FB        struct {
 		Shares int `bson:"shares" json:"shares"`
@@ -339,6 +340,34 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 	}
 
 	collection.Find(docToUpdate).One(&a)
+}
+
+func (a *Article) LoadArticleById(id bson.ObjectId, db *mgo.Database) {
+	collection := db.C("articles")
+	findQuery := bson.M{"_id": id}
+
+	err := collection.Find(findQuery).One(&a)
+	if err != nil {
+		log.Println("LoadArticleById: Could not load article:", err)
+		return
+	}
+
+	return
+}
+
+func (a *Article) UpdateShares(db *mgo.Database) {
+	collection := db.C("articles")
+
+	if len(a.Id) > 0 {
+		update := bson.M{}
+
+		err := collection.UpdateId(a.Id, update)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+
 }
 
 func (a *Article) UpdateTags(db *mgo.Database) {
