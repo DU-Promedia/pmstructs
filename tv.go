@@ -36,8 +36,6 @@ func (t *TV) LoadByOrigin(o string, db *mgo.Database) {
 		coll := db.C("tvs")
 		findQuery := bson.M{"origin": o}
 
-		t.Origin = o
-
 		err := coll.Find(findQuery).One(&t)
 		if err != nil {
 			log.Println("No can to load TV:", err)
