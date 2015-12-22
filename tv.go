@@ -18,40 +18,41 @@ func (t *TV) SaveToDB(db *mgo.Database) bool {
 	coll := db.C("tvs")
 
 	savedTv := TV{}
-	savedTv.LoadByOrigin(t.Origin, db)
+	existsInDb := savedTv.LoadByOrigin(t.Origin, db)
 
-	t.ID = savedTv.ID
+	if existsInDb == true {
+		t.ID = savedTv.ID
+		err := coll.Update(bson.M{"origin": t.Origin}, t)
+		if err != nil {
+			log.Println("TV SaveToDB no update can be done:", err)
 
-	err := coll.Update(bson.M{"origin": t.Origin}, t)
-	if err != nil {
-		log.Println("TV SaveToDB no update can be done:", err)
-		return false
+			return false
+		}
+	} else {
+		err := coll.Insert(t)
+		if err != nil {
+			log.Println("TV SaveToDB no insert can do:", err)
+
+			return false
+		}
 	}
 
 	return true
 }
 
-func (t *TV) LoadByOrigin(o string, db *mgo.Database) {
+func (t *TV) LoadByOrigin(o string, db *mgo.Database) bool {
 	if len(o) > 0 {
 		coll := db.C("tvs")
 		findQuery := bson.M{"origin": o}
 
 		err := coll.Find(findQuery).One(&t)
 		if err != nil {
-			log.Println("No can to load TV:", err)
-
-			err = coll.Insert(t)
-			if err != nil {
-				log.Println("No can insert TV:", err)
-				return
-			}
-
-			err = coll.Find(findQuery).One(&t)
-			if err != nil {
-				log.Println("No can load TV:", err)
-			}
-
-			return
+			log.Println("No can do load TV:", err)
+			return false
 		}
+
+		return true
 	}
+
+	return false
 }
