@@ -113,6 +113,15 @@ type TeaserArticle struct {
 }
 
 /*
+ * Right Now Article
+ */
+type RightNow struct {
+	Headline string `json:"headline"`
+	Text     string `json:"text"`
+	Link     string `json:"link"`
+}
+
+/*
  * Article references used in sections
  */
 type ArticleRef struct {
