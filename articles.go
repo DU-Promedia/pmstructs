@@ -56,7 +56,7 @@ type Article struct {
 	Video           ArticleVideo       `xml:"PicSearchVideo" bson:"video" json:"video"`
 	TopContent      string             `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent"`
 	Sections        []ArticleSection   `bson:"sections" json:"sections"`
-	Shares          ArticleShares      `bson:"shares,omitempty" json:"shares,omitempty"`
+	Shares          ArticleShares      `bson:"shares" json:"shares"`
 }
 
 /*
@@ -138,7 +138,7 @@ type ArticlePoll struct {
 
 type ArticleShares struct {
 	Id        bson.ObjectId `bson:"_id,omitempty" json:"id"`
-	ArticleID bson.ObjectId `bson:"articleid" json:"articleid"`
+	ArticleID bson.ObjectId `bson:"articleid,omitempty" json:"articleid"`
 	Origin    string        `bson:"origin" json:"origin"`
 	Date      time.Time     `bson:"date" json:"date"`
 	FB        struct {
@@ -351,32 +351,49 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 	collection.Find(docToUpdate).One(&a)
 }
 
-func (a *Article) LoadArticleById(id bson.ObjectId, db *mgo.Database) {
-	collection := db.C("articles")
-	findQuery := bson.M{"_id": id}
-
-	err := collection.Find(findQuery).One(&a)
-	if err != nil {
-		log.Println("LoadArticleById: Could not load article:", err)
-		return
+func (a *Article) LoadArticleById(id bson.ObjectId, db *mgo.Database) bool {
+	if !id.Valid() {
+		log.Println("No valid ID")
+		return false
 	}
 
-	return
+	collection := db.C("articles")
+
+	err := collection.FindId(id).One(&a)
+	if err != nil {
+		log.Println("LoadArticleById: Could not load article:", err)
+		return false
+	}
+
+	return true
 }
 
 func (a *Article) UpdateShares(db *mgo.Database) {
-	collection := db.C("articles")
+	//collection := db.C("articles")
 
 	if len(a.Id) > 0 {
-		update := bson.M{}
-
-		err := collection.UpdateId(a.Id, update)
-		if err != nil {
-			log.Println(err)
-			return
-		}
+		// err := collection.UpdateId(a.Id, update)
+		// if err != nil {
+		// 	log.Println(err)
+		// 	return
+		// }
+		log.Println("Doing nothing this function is useless")
 	}
 
+}
+
+func (a *Article) Update(db *mgo.Database) {
+	if a.Id.Valid() {
+		collection := db.C("articles")
+
+		err := collection.UpdateId(a.Id, a)
+		if err != nil {
+			log.Println("Article Update:", err)
+			return
+		}
+	} else {
+		log.Println("No ID given. Article not updated")
+	}
 }
 
 func (a *Article) UpdateTags(db *mgo.Database) {

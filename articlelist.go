@@ -56,6 +56,8 @@ func (a *ArticleListCommon) Save(db *mgo.Database) {
 		}
 	}
 
+	log.Println("ArticleList saved")
+
 	return
 }
 
@@ -104,6 +106,21 @@ func (a *ArticleListCommon) LoadFromDB(db *mgo.Database) {
 	}
 
 	return
+}
+
+func (a *ArticleListCommon) LoadFromDBByID(db *mgo.Database) {
+	if a.ID.Valid() == false {
+		log.Println("ArticleListCommon LoadFromDBById: Not an objectid")
+		return
+	}
+
+	secCol := db.C("sections")
+
+	err := secCol.FindId(a.ID).One(&a)
+	if err != nil {
+		log.Println("ArticleListCommon LoadFromDBById:", err)
+		return
+	}
 }
 
 func (a *ArticleListCommon) SaveCached(db *mgo.Database) {
