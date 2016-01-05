@@ -51,6 +51,11 @@ func (a *ArticleListCommon) Save(db *mgo.Database) {
 			log.Println("ArticleListCommon Save: No insert:", err)
 		}
 	} else {
+
+		if len(a.ArticleList) == 0 && len(savedList.ArticleList) > 0 {
+			a.ArticleList = savedList.ArticleList
+		}
+
 		err = coll.Update(findQuery, a)
 		if err != nil {
 			log.Println("ArticleListCommon Save: No update:", err)
