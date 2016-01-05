@@ -12,24 +12,25 @@ import (
  * AKA: Sections
  */
 type ArticleListCommon struct {
-	ID          bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-	OriginID    string        `bson:"originid" json:"id"`
+	ID          bson.ObjectId `bson:"_id,omitempty" json:"id"`
+	OriginID    string        `bson:"originid,omitempty" json:"mid,omitempty"`
 	Origin      string        `bson:"origin" json:"origin"`
 	OriginApp   string        `bson:"originapp" json:"-"`
+	Type        string        `bson:"type" json:"type,omitempty"`
 	Url         string        `json:"url" bson:"url"`
-	Articles    []Article     `json:"articles" bson:"-"`
+	Articles    []Article     `json:"articles,omitempty" bson:"-"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"-"`
 }
 
-type ArticleListCommonCache struct {
-	ID        bson.ObjectId `bson:"_id,omitempty" json:"cacheid"`
-	SectionID bson.ObjectId `bson:"sectiond" json:"mid"`
-	OriginID  string        `bson:"originid" json:"id"`
-	Origin    string        `bson:"origin" json:"origin"`
-	OriginApp string        `bson:"originapp" json:"originapp"`
-	Url       string        `json:"url" bson:"url"`
-	Articles  []Article     `json:"articles" bson:"articles"`
-}
+// type ArticleListCommonCache struct {
+// 	ID        bson.ObjectId `bson:"_id,omitempty" json:"cacheid"`
+// 	SectionID bson.ObjectId `bson:"sectiond" json:"mid"`
+// 	OriginID  string        `bson:"originid" json:"id"`
+// 	Origin    string        `bson:"origin" json:"origin"`
+// 	OriginApp string        `bson:"originapp" json:"originapp"`
+// 	Url       string        `json:"url" bson:"url"`
+// 	Articles  []Article     `json:"articles" bson:"articles"`
+// }
 
 func (a *ArticleListCommon) Save(db *mgo.Database) {
 	if len(a.Url) == 0 {
@@ -123,39 +124,39 @@ func (a *ArticleListCommon) LoadFromDBByID(db *mgo.Database) {
 	}
 }
 
-func (a *ArticleListCommon) SaveCached(db *mgo.Database) {
-	a.LoadArticles(db)
+// func (a *ArticleListCommon) SaveCached(db *mgo.Database) {
+// 	a.LoadArticles(db)
 
-	if len(a.Articles) == 0 {
-		log.Println("ArticleListCommon SaveCached: No articles in list to cache")
-		return
-	}
+// 	if len(a.Articles) == 0 {
+// 		log.Println("ArticleListCommon SaveCached: No articles in list to cache")
+// 		return
+// 	}
 
-	cacheCol := db.C("sections_cache")
+// 	cacheCol := db.C("sections_cache")
 
-	cache := ArticleListCommonCache{}
-	cache.SectionID = a.ID
-	cache.OriginID = a.OriginID
-	cache.Origin = a.Origin
-	cache.OriginApp = a.OriginApp
-	cache.Url = a.Url
-	cache.Articles = a.Articles
+// 	cache := ArticleListCommonCache{}
+// 	cache.SectionID = a.ID
+// 	cache.OriginID = a.OriginID
+// 	cache.Origin = a.Origin
+// 	cache.OriginApp = a.OriginApp
+// 	cache.Url = a.Url
+// 	cache.Articles = a.Articles
 
-	findQuery := bson.M{"sectionid": cache.SectionID}
-	savedList := ArticleListCommon{}
-	err := cacheCol.Find(findQuery).One(&savedList)
-	if err != nil {
-		// Do an insert
-		err = cacheCol.Insert(cache)
-		if err != nil {
-			log.Println("ArticleListCommon SaveCached: No insert:", err)
-		}
-		return
-	}
+// 	findQuery := bson.M{"sectionid": cache.SectionID}
+// 	savedList := ArticleListCommon{}
+// 	err := cacheCol.Find(findQuery).One(&savedList)
+// 	if err != nil {
+// 		// Do an insert
+// 		err = cacheCol.Insert(cache)
+// 		if err != nil {
+// 			log.Println("ArticleListCommon SaveCached: No insert:", err)
+// 		}
+// 		return
+// 	}
 
-	err = cacheCol.Update(findQuery, cache)
-	if err != nil {
-		log.Println("ArticleListCommon SaveCached: Could not insert or update:", err)
-	}
+// 	err = cacheCol.Update(findQuery, cache)
+// 	if err != nil {
+// 		log.Println("ArticleListCommon SaveCached: Could not insert or update:", err)
+// 	}
 
-}
+// }

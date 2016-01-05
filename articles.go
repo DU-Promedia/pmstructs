@@ -3,10 +3,10 @@ package pmstructs
 import (
 	"log"
 	"net/url"
-	"strings"
+	//"strings"
 	"time"
 
-	"github.com/PuerkitoBio/goquery"
+	//"github.com/PuerkitoBio/goquery"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -24,7 +24,7 @@ type Article struct {
 	Supertitle      string             `xml:"StandardArticleSuperTitle" json:"supertitle"`
 	Preamble        string             `xml:"StandardArticlePreamble" json:"preamble"`
 	Body            string             `xml:"StandardArticleBody" json:"content"`
-	BodyParts       []string           `bson:"contentparts" json:"contentparts"`
+	BodyParts       []string           `bson:"contentparts,omitempty" json:"contentparts,omitempty"`
 	Image           string             `xml:"StandardArticleImage>StandardArticleImagePath" json:"image" bson:"image"`
 	ImageByline     string             `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline" bson:"imagebyline"`
 	ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages" bson:"articleimages"`
@@ -44,6 +44,7 @@ type Article struct {
 	ExtraTeaser     ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" json:"extrateaser"`
 	Byline          []ArticleByline    `xml:"StandardArticleBylines>StandardArticleByline" json:"bylines"`
 	Links           []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks"`
+	CommentCount    int                `bson:"commentcount,omitempty" json:"commentcount"`
 	CommentsEnabled string             `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
 	CommentsTitle   string             `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle"`
 	Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments"`
@@ -110,15 +111,6 @@ type TeaserArticle struct {
 	Internal string        `xml:"Internal" json:"internal"`
 	Link     string        `xml:"TeaserArticleExternal>TeaserArticleExternalLink" json:"link"`
 	Linktext string        `xml:"TeaserArticleExternal>TeaserArticleExternalLinkName" json:"linktext"`
-}
-
-/*
- * Right Now Article
- */
-type RightNow struct {
-	Headline string `json:"headline"`
-	Text     string `json:"text"`
-	Link     string `json:"link"`
 }
 
 /*
@@ -262,6 +254,7 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 
 	arturl, _ := url.Parse(a.OriginalLink)
 	a.OriginSource = arturl.Host
+	a.CommentCount = len(a.Comments)
 
 	// Find Document
 	docToUpdate := bson.M{"originid": a.OriginID}
@@ -327,21 +320,21 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 	}
 
 	// Parse body!
-	rr := strings.NewReader(a.Body)
-	doc, err := goquery.NewDocumentFromReader(rr)
-	if err != nil {
-		log.Println("Could not read article body")
-	} else {
-		bodyParts := []string{}
-		doc.Find("p").Each(func(i int, s *goquery.Selection) {
-			html, _ := s.Html()
-			bodyParts = append(bodyParts, html)
-		})
+	// rr := strings.NewReader(a.Body)
+	// doc, err := goquery.NewDocumentFromReader(rr)
+	// if err != nil {
+	// 	log.Println("Could not read article body")
+	// } else {
+	// 	bodyParts := []string{}
+	// 	doc.Find("p").Each(func(i int, s *goquery.Selection) {
+	// 		html, _ := s.Html()
+	// 		bodyParts = append(bodyParts, html)
+	// 	})
 
-		if len(bodyParts) > 0 {
-			a.BodyParts = bodyParts
-		}
-	}
+	// 	if len(bodyParts) > 0 {
+	// 		a.BodyParts = bodyParts
+	// 	}
+	// }
 
 	if err = collection.Update(docToUpdate, a); err != nil {
 		log.Println("Article SaveToDB: Could not update:", err)
@@ -360,6 +353,24 @@ func (a *Article) LoadArticleById(id bson.ObjectId, db *mgo.Database) bool {
 	collection := db.C("articles")
 
 	err := collection.FindId(id).One(&a)
+	if err != nil {
+		log.Println("LoadArticleById: Could not load article:", err)
+		return false
+	}
+
+	return true
+}
+
+func (a *Article) LoadArticleByOriginId(id string, db *mgo.Database) bool {
+	if len(id) == 0 {
+		log.Println("No valid ID")
+		return false
+	}
+
+	collection := db.C("articles")
+	query := bson.M{"originid": id}
+
+	err := collection.Find(query).One(&a)
 	if err != nil {
 		log.Println("LoadArticleById: Could not load article:", err)
 		return false

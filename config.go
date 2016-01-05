@@ -18,11 +18,12 @@ type ConfigList struct {
 }
 
 type Config struct {
-	ID        bson.ObjectId    `bson:"_id,omitempty" json:"mid"`
-	AppID     string           `json:"appid"`
-	Origin    string           `json:"origin" bson:"originhost"`
-	SectionID bson.ObjectId    `bson:"sectionid,omitempty" json:"-"`
-	Sections  []ConfigSections `json:"sections"`
+	ID           bson.ObjectId    `bson:"_id,omitempty" json:"mid"`
+	AppID        string           `json:"appid"`
+	Origin       string           `json:"origin" bson:"originhost"`
+	PrimaryColor string           `json:"primarycolor" bson:"primarycolor"`
+	SectionID    bson.ObjectId    `bson:"sectionid,omitempty" json:"-"`
+	Sections     []ConfigSections `json:"sections"`
 }
 
 type ConfigSections struct {
@@ -80,28 +81,21 @@ func (c *Config) Save(db *mgo.Database) {
 	// Find created section based on url
 	for ix, x := range c.Sections {
 		findSect := bson.M{"url": x.Url}
+
 		sect := ArticleListCommon{}
+		sect.Url = x.Url
+		sect.Origin = c.Origin
+		sect.OriginApp = c.AppID
+		sect.Url = x.Url
+		sect.Type = x.Type
+		sect.Save(db)
 
 		err := sectionsCollection.Find(findSect).One(&sect)
 		if err != nil {
 			if debugMode {
 				log.Println("Could not find", findSect, err)
-				log.Println("Inserting ...")
-			}
-
-			insect := ArticleListCommon{}
-			insect.Origin = c.Origin
-			insect.OriginApp = c.AppID
-			insect.Url = x.Url
-
-			//sectionsCollection.Upsert(findSect, insect)
-			err = sectionsCollection.Insert(insect)
-			if err != nil {
-				log.Println(err)
 				continue
 			}
-
-			sectionsCollection.Find(findSect).One(&sect)
 		}
 
 		c.Sections[ix].SectionID = sect.ID
@@ -110,27 +104,19 @@ func (c *Config) Save(db *mgo.Database) {
 			for ixb, y := range x.Subsections {
 				findSect = bson.M{"url": y.Url}
 
+				subsect := ArticleListCommon{}
+				subsect.Origin = c.Origin
+				subsect.OriginApp = c.AppID
+				subsect.Url = y.Url
+				subsect.Type = y.Type
+				subsect.Save(db)
+
 				err = sectionsCollection.Find(findSect).One(&sect)
 				if err != nil {
 					if debugMode {
 						log.Println("Could not find", findSect, err)
-						log.Println("Inserting ...")
-					}
-
-					insect := ArticleListCommon{}
-					insect.Origin = c.Origin
-					insect.OriginApp = c.AppID
-					insect.Url = y.Url
-
-					err = sectionsCollection.Insert(insect)
-					if err != nil {
-						log.Println(err)
 						continue
 					}
-
-					sectionsCollection.Find(findSect).One(&sect)
-
-					continue
 				}
 
 				c.Sections[ix].Subsections[ixb].SectionID = sect.ID
