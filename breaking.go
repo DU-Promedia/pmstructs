@@ -80,7 +80,8 @@ func (e *ExtraBlock) LoadArticles(db *mgo.Database) bool {
 type RightNow struct {
 	Id        bson.ObjectId `bson:"_id,omitempty" json:"mid"`
 	Origin    string        `bson:"origin" json:"origin"`
-	ArticleID bson.ObjectId `bson:"articleid" json:"id"`
+	ArticleID bson.ObjectId `bson:"articleid" json:"-"`
+	OriginID  string        `bson:"-" json:"id"`
 	Headline  string        `bson:"headline" json:"headline"`
 	Link      string        `bson:"link" json:"-"`
 	Text      string        `bson:"text" json:"text"`

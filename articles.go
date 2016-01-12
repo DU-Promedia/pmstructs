@@ -63,39 +63,39 @@ type Article struct {
 /*
  * Complete article
  */
-type ArticleExport struct {
-	Id           bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-	OriginID     string        `xml:"id,attr" json:"id"`
-	OriginalLink string        `xml:"StandardArticleOriginalLink" json:"originallink"`
-	OriginSource string        `bson:"originsource" json:"originsource"`
-	Title        string        `xml:"StandardArticleTitle" json:"title"`
-	Subtitle     string        `xml:"StandardArticleSubTitle" json:"subtitle"`
-	Preamble     string        `xml:"StandardArticlePreamble" json:"preamble"`
-	Body         string        `xml:"StandardArticleBody" json:"content"`
-	Image        string        `xml:"StandardArticleImage>StandardArticleImagePath" json:"image" bson:"image"`
-	ImageByline  string        `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline" bson:"imagebyline"`
-	//ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages" bson:"articleimages"`
-	//ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum" bson:"imagealbum"`
-	Category    string             `xml:"StandardArticleCategory" json:"category" bson:"category"`
-	Pubdate     time.Time          `json:"pubdate" bson:"pubdate"`
-	Moddate     time.Time          `json:"moddate" bson:"moddate"`
-	Location    string             `xml:"Location" json:"location" bson:"location"`
-	Latitude    string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude" bson:"latitude"`
-	Longitude   string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude" bson:"longitude"`
-	Department  string             `xml:"ArticleDepartment" json:"department"`
-	Teaser      ArticleTeaser      `xml:"StandardArticleTeaser" json:"teaser"`
-	ExtraTeaser ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" json:"extrateaser"`
-	Byline      []ArticleByline    `xml:"StandardArticleBylines>StandardArticleByline" json:"bylines"`
-	//Links           []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks"`
-	CommentsEnabled string `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
-	CommentsTitle   string `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle"`
-	//Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments"`
-	//Facts           []ArticleFact      `xml:"StandardArticleFacts>StandardArticleFact" json:"facts"`
-	//BackgroundFacts []ArticleFact      `xml:"StandardArticleBackgroundFacts>StandardArticleBackgroundFact" json:"backgroundfacts"`
-	LastMod    time.Time    `json:"lastmod" bson:"lastmod"`
-	Video      ArticleVideo `xml:"PicSearchVideo" bson:"video" json:"video"`
-	TopContent string       `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent"`
-}
+// type ArticleExport struct {
+// 	Id           bson.ObjectId `bson:"_id,omitempty" json:"mid"`
+// 	OriginID     string        `xml:"id,attr" json:"id"`
+// 	OriginalLink string        `xml:"StandardArticleOriginalLink" json:"originallink"`
+// 	OriginSource string        `bson:"originsource" json:"originsource"`
+// 	Title        string        `xml:"StandardArticleTitle" json:"title"`
+// 	Subtitle     string        `xml:"StandardArticleSubTitle" json:"subtitle"`
+// 	Preamble     string        `xml:"StandardArticlePreamble" json:"preamble"`
+// 	Body         string        `xml:"StandardArticleBody" json:"content"`
+// 	Image        string        `xml:"StandardArticleImage>StandardArticleImagePath" json:"image" bson:"image"`
+// 	ImageByline  string        `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline" bson:"imagebyline"`
+// 	//ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages" bson:"articleimages"`
+// 	//ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum" bson:"imagealbum"`
+// 	Category    string             `xml:"StandardArticleCategory" json:"category" bson:"category"`
+// 	Pubdate     time.Time          `json:"pubdate" bson:"pubdate"`
+// 	Moddate     time.Time          `json:"moddate" bson:"moddate"`
+// 	Location    string             `xml:"Location" json:"location" bson:"location"`
+// 	Latitude    string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude" bson:"latitude"`
+// 	Longitude   string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude" bson:"longitude"`
+// 	Department  string             `xml:"ArticleDepartment" json:"department"`
+// 	Teaser      ArticleTeaser      `xml:"StandardArticleTeaser" json:"teaser"`
+// 	ExtraTeaser ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" json:"extrateaser"`
+// 	Byline      []ArticleByline    `xml:"StandardArticleBylines>StandardArticleByline" json:"bylines"`
+// 	//Links           []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks"`
+// 	CommentsEnabled string `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
+// 	CommentsTitle   string `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle"`
+// 	//Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments"`
+// 	//Facts           []ArticleFact      `xml:"StandardArticleFacts>StandardArticleFact" json:"facts"`
+// 	//BackgroundFacts []ArticleFact      `xml:"StandardArticleBackgroundFacts>StandardArticleBackgroundFact" json:"backgroundfacts"`
+// 	LastMod    time.Time    `json:"lastmod" bson:"lastmod"`
+// 	Video      ArticleVideo `xml:"PicSearchVideo" bson:"video" json:"video"`
+// 	TopContent string       `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent"`
+// }
 
 /*
  * Teaser article
@@ -184,7 +184,7 @@ type ArticleLinks struct {
 }
 
 type ArticleComments struct {
-	ID        string `xml:"attr,id" json:"id"`
+	ID        string `xml:"id,attr" json:"id"`
 	Title     string `xml:"Title" json:"title"`
 	Body      string `xml:"Body" json:"body"`
 	Author    string `xml:"Author>AliasOrFullName" json:"author"`
