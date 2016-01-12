@@ -15,7 +15,7 @@ type ExtraBlock struct {
 	Id              bson.ObjectId `bson:"_id,omitempty" json:"id"`
 	Origin          string        `bson:"origin" json:"origin"`
 	OriginPlacement int           `bson:"originplacement" json:"placement"`
-	Headline        string        `bson:"headline"`
+	Headline        string        `bson:"headline" json:"headline"`
 	Pubdate         time.Time     `bson:"pubdate" json:"pubdate"`
 	ArticleList     []ArticleRef  `bson:"articles" json:"-"`
 	Articles        []Article     `bson:"-" json:"articles"`
@@ -53,6 +53,25 @@ func (e *ExtraBlock) Remove(db *mgo.Database) bool {
 	if err != nil {
 		log.Println("ExtraBlock Remove:", err)
 		return false
+	}
+
+	return true
+}
+
+func (e *ExtraBlock) LoadArticles(db *mgo.Database) bool {
+	//collection := db.C("extrablocks")
+	articlesCollection := db.C("articles")
+
+	for _, art := range e.ArticleList {
+		sart := Article{}
+
+		err := articlesCollection.FindId(art.ArticleID).One(&sart)
+		if err != nil {
+			log.Println("Could not find:", art.ArticleID)
+			return false
+		}
+
+		e.Articles = append(e.Articles, sart)
 	}
 
 	return true
