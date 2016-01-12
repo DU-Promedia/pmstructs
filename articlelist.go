@@ -16,21 +16,11 @@ type ArticleListCommon struct {
 	OriginID    string        `bson:"originid,omitempty" json:"mid,omitempty"`
 	Origin      string        `bson:"origin" json:"origin"`
 	OriginApp   string        `bson:"originapp" json:"-"`
-	Type        string        `bson:"type" json:"type,omitempty"`
+	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
 	Articles    []Article     `json:"articles,omitempty" bson:"-"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"-"`
 }
-
-// type ArticleListCommonCache struct {
-// 	ID        bson.ObjectId `bson:"_id,omitempty" json:"cacheid"`
-// 	SectionID bson.ObjectId `bson:"sectiond" json:"mid"`
-// 	OriginID  string        `bson:"originid" json:"id"`
-// 	Origin    string        `bson:"origin" json:"origin"`
-// 	OriginApp string        `bson:"originapp" json:"originapp"`
-// 	Url       string        `json:"url" bson:"url"`
-// 	Articles  []Article     `json:"articles" bson:"articles"`
-// }
 
 func (a *ArticleListCommon) Save(db *mgo.Database) {
 	if len(a.Url) == 0 {
@@ -51,18 +41,16 @@ func (a *ArticleListCommon) Save(db *mgo.Database) {
 			log.Println("ArticleListCommon Save: No insert:", err)
 		}
 	} else {
-
 		if len(a.ArticleList) == 0 && len(savedList.ArticleList) > 0 {
 			a.ArticleList = savedList.ArticleList
 		}
 
-		err = coll.Update(findQuery, a)
+		_, err = coll.Upsert(findQuery, a)
+		//err = coll.Update(findQuery, a)
 		if err != nil {
 			log.Println("ArticleListCommon Save: No update:", err)
 		}
 	}
-
-	log.Println("ArticleList saved")
 
 	return
 }
