@@ -60,12 +60,12 @@ func (e *ExtraBlock) Remove(db *mgo.Database) bool {
 
 type RightNow struct {
 	Id        bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-	Origin    string        `bson:"origin"`
+	Origin    string        `bson:"origin" json:"origin"`
 	ArticleID bson.ObjectId `bson:"articleid" json:"id"`
-	Headline  string        `bson:"headline"`
-	Link      string        `bson:"link"`
-	Text      string        `bson:"text"`
-	Pubdate   time.Time     `bson:"pubdate"`
+	Headline  string        `bson:"headline" json:"headline"`
+	Link      string        `bson:"link" json:"-"`
+	Text      string        `bson:"text" json:"text"`
+	Pubdate   time.Time     `bson:"pubdate" json:"pubdate"`
 }
 
 func (r *RightNow) Save(db *mgo.Database) bool {
