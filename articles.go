@@ -20,15 +20,15 @@ type Article struct {
 	OriginalLink    string             `xml:"StandardArticleOriginalLink" json:"originallink"`
 	OriginSource    string             `bson:"originsource" json:"originsource"`
 	Title           string             `xml:"StandardArticleTitle" json:"title"`
-	Subtitle        string             `xml:"StandardArticleSubTitle" json:"subtitle"`
-	Supertitle      string             `xml:"StandardArticleSuperTitle" json:"supertitle"`
+	Subtitle        string             `xml:"StandardArticleSubTitle" json:"subtitle,omitempty"`
+	Supertitle      string             `xml:"StandardArticleSuperTitle" json:"supertitle,omitempty"`
 	Preamble        string             `xml:"StandardArticlePreamble" json:"preamble"`
 	Body            string             `xml:"StandardArticleBody" json:"content"`
 	BodyParts       []string           `bson:"contentparts,omitempty" json:"contentparts,omitempty"`
 	Image           string             `xml:"StandardArticleImage>StandardArticleImagePath" json:"image" bson:"image"`
 	ImageByline     string             `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline" bson:"imagebyline"`
-	ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages" bson:"articleimages"`
-	ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum" bson:"imagealbum"`
+	ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages,omitempty" bson:"articleimages"`
+	ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum,omitempty" bson:"imagealbum"`
 	Category        string             `xml:"StandardArticleCategory" json:"category"`
 	ArticleType     string             `xml:"StandardArticleType" bson:"articletype" json:"-"`
 	ArticleInfo     string             `xml:"StandardArticleInfo" bson:"articleinfo" json:"-"`
@@ -184,6 +184,7 @@ type ArticleLinks struct {
 }
 
 type ArticleComments struct {
+	ID        string `xml:"attr,id" json:"id"`
 	Title     string `xml:"Title" json:"title"`
 	Body      string `xml:"Body" json:"body"`
 	Author    string `xml:"Author>AliasOrFullName" json:"author"`
@@ -342,6 +343,7 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 	}
 
 	collection.Find(docToUpdate).One(&a)
+	go a.UpdateShares(db)
 }
 
 func (a *Article) LoadArticleById(id bson.ObjectId, db *mgo.Database) bool {
@@ -380,17 +382,34 @@ func (a *Article) LoadArticleByOriginId(id string, db *mgo.Database) bool {
 }
 
 func (a *Article) UpdateShares(db *mgo.Database) {
-	//collection := db.C("articles")
-
 	if len(a.Id) > 0 {
-		// err := collection.UpdateId(a.Id, update)
-		// if err != nil {
-		// 	log.Println(err)
-		// 	return
-		// }
-		log.Println("Doing nothing this function is useless")
-	}
+		collection := db.C("articles")
+		sharesCollection := db.C("shares")
 
+		// Find latest share count
+		shares := ArticleShares{}
+		findQuery := bson.M{"articleid": a.Id}
+
+		err := sharesCollection.Find(findQuery).Sort("-date").Limit(1).One(&shares)
+		if err != nil {
+			//log.Println("Found no shares for article", a.Id)
+			return
+		}
+
+		// Check the ID
+		if shares.Id.Valid() == false {
+			log.Println("No share id thats calid found")
+			return
+		}
+
+		// Update article with share count
+		updateQuery := bson.M{"$set": bson.M{"shares": shares}}
+
+		err = collection.UpdateId(a.Id, updateQuery)
+		if err != nil {
+			log.Println("Could not update shares for", a.Id)
+		}
+	}
 }
 
 func (a *Article) Update(db *mgo.Database) {

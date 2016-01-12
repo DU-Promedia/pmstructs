@@ -11,6 +11,53 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+type ExtraBlock struct {
+	Id              bson.ObjectId `bson:"_id,omitempty" json:"id"`
+	Origin          string        `bson:"origin" json:"origin"`
+	OriginPlacement int           `bson:"originplacement" json:"placement"`
+	Headline        string        `bson:"headline"`
+	Pubdate         time.Time     `bson:"pubdate" json:"pubdate"`
+	ArticleList     []ArticleRef  `bson:"articles" json:"-"`
+	Articles        []Article     `bson:"-" json:"articles"`
+}
+
+func (e *ExtraBlock) Save(db *mgo.Database) bool {
+	collection := db.C("extrablocks")
+
+	query := bson.M{"origin": e.Origin, "originplacement": e.OriginPlacement}
+	res := ExtraBlock{}
+
+	err := collection.Find(query).One(&res)
+	if err != nil {
+		log.Println("ExtraBlock Save:", err)
+	}
+
+	if res.Id.Valid() {
+		log.Println("Saving extra block")
+		collection.UpdateId(res.Id, e)
+	} else {
+		log.Println("Inserting extra block")
+		collection.Insert(e)
+	}
+
+	// Load new data in to ExtraBlock
+	collection.Find(query).One(&e)
+
+	return true
+}
+
+func (e *ExtraBlock) Remove(db *mgo.Database) bool {
+	collection := db.C("extrablocks")
+
+	err := collection.RemoveId(e.Id)
+	if err != nil {
+		log.Println("ExtraBlock Remove:", err)
+		return false
+	}
+
+	return true
+}
+
 type RightNow struct {
 	Id        bson.ObjectId `bson:"_id,omitempty" json:"mid"`
 	Origin    string        `bson:"origin"`
