@@ -3,7 +3,7 @@ package pmstructs
 import (
 	"encoding/xml"
 	"log"
-	"net/url"
+	//	"net/url"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -26,6 +26,7 @@ type ArticleList struct {
 	ID          bson.ObjectId `bson:"_id,omitempty" json:"mid"`
 	OriginID    string        `xml:"id,attr" bson:"originid" json:"id"`
 	Origin      string        `bson:"origin" json:"origin"`
+	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
 	Articles    []Article     `xml:"MobileContentBlock>StandardArticle" bson:"-" json:"-"`
@@ -36,6 +37,7 @@ type ArticleContentPlacement struct {
 	ID          bson.ObjectId `bson:"_id,omitempty" json:"mid"`
 	OriginID    string        `xml:"id,attr" bson:"originid" json:"id"`
 	Origin      string        `bson:"origin" json:"origin"`
+	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
 	Articles    []Article     `xml:"StandardArticle" bson:"-"`
@@ -46,6 +48,7 @@ type ArticleStatisticsList struct {
 	ID          bson.ObjectId `bson:"_id,omitempty" json:"mid"`
 	OriginID    string        `xml:"id,attr" bson:"originid" json:"id"`
 	Origin      string        `bson:"origin" json:"origin"`
+	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
 	Articles    []Article     `xml:"List>ListItem>StandardArticle" bson:"-" json:"-"`
@@ -55,39 +58,17 @@ type ArticleStatisticsList struct {
  * ContentPlacements
  */
 func (list *ArticleContentPlacement) Save(db *mgo.Database) {
-	sectionCollection := db.C("sections")
+	log.Println("Saving ArticleContentPlacement:", list.Url)
 
-	// Index should be unique by originid so we should be safe
-	parseUrl, _ := url.Parse(list.Url)
-	list.Origin = parseUrl.Host
+	common := ArticleListCommon{}
+	common.Url = list.Url
+	common.Type = list.Type
+	common.Origin = list.Origin
+	common.Type = list.Type
+	common.ArticleList = list.ArticleList
+	common.Articles = list.Articles
 
-	oldArticles := list.Articles
-	oldReflist := list.ArticleList
-
-	// Find in DB
-	err := sectionCollection.Find(bson.M{"url": list.Url}).One(&list)
-	if err != nil {
-		// Found no section for articlelist
-		log.Println("Inserting section")
-		sectionCollection.Insert(list)
-		err = sectionCollection.Find(bson.M{"url": list.Url}).One(&list)
-		if err != nil {
-			log.Println("ArticleContentPlacement:", err)
-			return
-		}
-	}
-
-	if len(oldReflist) > 0 {
-		list.ArticleList = oldReflist
-	}
-
-	if len(oldArticles) > 0 {
-		list.Articles = oldArticles
-	}
-
-	sectionCollection.Update(bson.M{"url": list.Url}, list)
-
-	//sectionCollection.Find(bson.M{"url": list.Url}).One(&list)
+	common.Save(db)
 }
 
 func (list *ArticleContentPlacement) SaveToDB(db *mgo.Database) {
@@ -130,39 +111,17 @@ func (list *ArticleContentPlacement) GetArticles() []Article {
  * Article list
  */
 func (list *ArticleList) Save(db *mgo.Database) {
-	sectionCollection := db.C("sections")
+	log.Println("Saving ArticleList:", list.Url)
 
-	// Index should be unique by originid so we should be safe
-	parseUrl, _ := url.Parse(list.Url)
-	list.Origin = parseUrl.Host
+	common := ArticleListCommon{}
+	common.Url = list.Url
+	common.Type = list.Type
+	common.Origin = list.Origin
+	common.Type = list.Type
+	common.ArticleList = list.ArticleList
+	common.Articles = list.Articles
 
-	oldArticles := list.Articles
-	oldReflist := list.ArticleList
-
-	// Find in DB
-	err := sectionCollection.Find(bson.M{"url": list.Url}).One(&list)
-	if err != nil {
-		// Found no section for articlelist
-		log.Println("Inserting section")
-		sectionCollection.Insert(list)
-		err = sectionCollection.Find(bson.M{"url": list.Url}).One(&list)
-		if err != nil {
-			log.Println("ArticleContentPlacement:", err)
-			return
-		}
-	}
-
-	if len(oldReflist) > 0 {
-		list.ArticleList = oldReflist
-	}
-
-	if len(oldArticles) > 0 {
-		list.Articles = oldArticles
-	}
-
-	sectionCollection.Update(bson.M{"url": list.Url}, list)
-
-	//sectionCollection.Find(bson.M{"url": list.Url}).One(&list)
+	common.Save(db)
 }
 
 func (list *ArticleList) SaveToDB(db *mgo.Database) {
@@ -202,38 +161,17 @@ func (list *ArticleList) GetArticles() []Article {
  * StatisticsList
  */
 func (list *ArticleStatisticsList) Save(db *mgo.Database) {
-	sectionCollection := db.C("sections")
+	log.Println("Saving StatisticsList:", list.Url)
 
-	// Index should be unique by originid so we should be safe
-	parseUrl, _ := url.Parse(list.Url)
-	list.Origin = parseUrl.Host
+	common := ArticleListCommon{}
+	common.Url = list.Url
+	common.Type = list.Type
+	common.Origin = list.Origin
+	common.Type = list.Type
+	common.ArticleList = list.ArticleList
+	common.Articles = list.Articles
 
-	oldArticles := list.Articles
-	oldReflist := list.ArticleList
-	savedList := ArticleListCommon{}
-
-	// Find in DB
-	err := sectionCollection.Find(bson.M{"url": list.Url}).One(&savedList)
-	if err != nil {
-		sectionCollection.Insert(list)
-		err = sectionCollection.Find(bson.M{"url": list.Url}).One(&savedList)
-		if err != nil {
-			log.Println("ArticleContentPlacement:", err)
-			return
-		}
-	}
-
-	if len(oldReflist) > 0 {
-		list.ArticleList = oldReflist
-	}
-
-	if len(oldArticles) > 0 {
-		list.Articles = oldArticles
-	}
-
-	sectionCollection.Update(bson.M{"url": list.Url}, list)
-
-	//sectionCollection.Find(bson.M{"url": list.Url}).One(&list)
+	common.Save(db)
 }
 
 func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {

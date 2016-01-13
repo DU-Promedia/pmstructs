@@ -45,6 +45,22 @@ func (a *ArticleListCommon) Save(db *mgo.Database) {
 			a.ArticleList = savedList.ArticleList
 		}
 
+		if len(a.Type) == 0 && len(savedList.Type) > 0 {
+			a.Type = savedList.Type
+		}
+
+		if len(a.Origin) == 0 && len(savedList.Origin) > 0 {
+			a.Origin = savedList.Origin
+		}
+
+		if len(a.OriginApp) == 0 && len(savedList.OriginApp) > 0 {
+			a.OriginApp = savedList.OriginApp
+		}
+
+		if len(a.OriginID) == 0 && len(savedList.OriginID) > 0 {
+			a.OriginID = savedList.OriginID
+		}
+
 		_, err = coll.Upsert(findQuery, a)
 		//err = coll.Update(findQuery, a)
 		if err != nil {
