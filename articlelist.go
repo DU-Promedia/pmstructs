@@ -132,3 +132,40 @@ func (a *ArticleListCommon) LoadFromDBByID(db *mgo.Database) {
 		return
 	}
 }
+
+// func (a *ArticleListCommon) SaveCached(db *mgo.Database) {
+// 	a.LoadArticles(db)
+
+// 	if len(a.Articles) == 0 {
+// 		log.Println("ArticleListCommon SaveCached: No articles in list to cache")
+// 		return
+// 	}
+
+// 	cacheCol := db.C("sections_cache")
+
+// 	cache := ArticleListCommonCache{}
+// 	cache.SectionID = a.ID
+// 	cache.OriginID = a.OriginID
+// 	cache.Origin = a.Origin
+// 	cache.OriginApp = a.OriginApp
+// 	cache.Url = a.Url
+// 	cache.Articles = a.Articles
+
+// 	findQuery := bson.M{"sectionid": cache.SectionID}
+// 	savedList := ArticleListCommon{}
+// 	err := cacheCol.Find(findQuery).One(&savedList)
+// 	if err != nil {
+// 		// Do an insert
+// 		err = cacheCol.Insert(cache)
+// 		if err != nil {
+// 			log.Println("ArticleListCommon SaveCached: No insert:", err)
+// 		}
+// 		return
+// 	}
+
+// 	err = cacheCol.Update(findQuery, cache)
+// 	if err != nil {
+// 		log.Println("ArticleListCommon SaveCached: Could not insert or update:", err)
+// 	}
+
+// }

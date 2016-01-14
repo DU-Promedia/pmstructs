@@ -25,58 +25,77 @@ type Article struct {
 	Preamble        string             `xml:"StandardArticlePreamble" json:"preamble"`
 	Body            string             `xml:"StandardArticleBody" json:"content"`
 	BodyParts       []string           `bson:"contentparts,omitempty" json:"contentparts,omitempty"`
-	Image           string             `xml:"StandardArticleImage>StandardArticleImagePath" json:"image,omitempty" bson:"image"`
-	ImageByline     string             `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline,omitempty" bson:"imagebyline"`
+	Image           string             `xml:"StandardArticleImage>StandardArticleImagePath" json:"image" bson:"image"`
+	ImageByline     string             `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline" bson:"imagebyline"`
 	ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages,omitempty" bson:"articleimages"`
 	ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum,omitempty" bson:"imagealbum"`
-	Category        string             `xml:"StandardArticleCategory" json:"category,omitempty"`
+	Category        string             `xml:"StandardArticleCategory" json:"category"`
 	ArticleType     string             `xml:"StandardArticleType" bson:"articletype" json:"-"`
 	ArticleInfo     string             `xml:"StandardArticleInfo" bson:"articleinfo" json:"-"`
 	PubdateRaw      string             `xml:"StandardArticlePubDate" json:"-"`
 	ModdateRaw      string             `xml:"StandardArticlePubModDate" json:"-"`
 	Pubdate         time.Time          `json:"pubdate" bson:"pubdate"`
 	Moddate         time.Time          `json:"moddate" bson:"moddate"`
-	Location        string             `xml:"Location" json:"location,omitempty"`
-	Latitude        string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude,omitempty" bson:"latitude"`
-	Longitude       string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude,omitempty" bson:"longitude"`
-	Department      string             `xml:"ArticleDepartment" json:"department,omitempty"`
+	Location        string             `xml:"Location" json:"location"`
+	Latitude        string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude" bson:"latitude"`
+	Longitude       string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude" bson:"longitude"`
+	Department      string             `xml:"ArticleDepartment" json:"department"`
 	Teaser          ArticleTeaser      `xml:"StandardArticleTeaser" json:"teaser"`
 	ExtraTeaser     ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" json:"extrateaser"`
 	Byline          []ArticleByline    `xml:"StandardArticleBylines>StandardArticleByline" json:"bylines"`
-	Links           []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks,omitempty"`
+	Links           []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks"`
 	CommentCount    int                `bson:"commentcount,omitempty" json:"commentcount"`
 	CommentsEnabled string             `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
-	CommentsTitle   string             `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle,omitempty"`
-	Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments,omitempty"`
-	Facts           []ArticleFact      `xml:"StandardArticleFacts>StandardArticleFact" json:"facts,omitempty"`
-	BackgroundFacts []ArticleFact      `xml:"StandardArticleBackgroundFacts>StandardArticleBackgroundFact" json:"backgroundfacts,omitempty"`
+	CommentsTitle   string             `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle"`
+	Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments"`
+	Facts           []ArticleFact      `xml:"StandardArticleFacts>StandardArticleFact" json:"facts"`
+	BackgroundFacts []ArticleFact      `xml:"StandardArticleBackgroundFacts>StandardArticleBackgroundFact" json:"backgroundfacts"`
 	Theme           string             `xml:"StandardArticleTheme" json:"-" bson:"theme"`
 	LastMod         time.Time          `json:"lastmod" bson:"lastmod"`
-	ArticleTags     []string           `xml:"StandardArticleKeyWords>StandardArticleKeyWord" json:"articletags,omitempty"`
+	ArticleTags     []string           `xml:"StandardArticleKeyWords>StandardArticleKeyWord" json:"articletags"`
 	Tags            []string           `json:"-" bson:"tags,omitempty"`
-	Video           ArticleVideo       `xml:"PicSearchVideo" bson:"video" json:"video,omitempty"`
-	TopContent      string             `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent,omitempty"`
-	Sections        []ArticleSection   `bson:"sections" json:"sections,omitempty"`
-	Shares          ArticleShares      `bson:"shares" json:"shares,omitempty"`
-	Serie           ArticleSerie       `xml:"StandardArticleArticleSeries>ArticleSerie" bson:"serie" json:"serie,omitempty"`
+	Video           ArticleVideo       `xml:"PicSearchVideo" bson:"video" json:"video"`
+	TopContent      string             `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent"`
+	Sections        []ArticleSection   `bson:"sections" json:"sections"`
+	Shares          ArticleShares      `bson:"shares" json:"shares"`
 }
 
 /*
- * Article Serie
+ * Complete article
  */
-type ArticleSerie struct {
-	Title    string                `xml:"Title" bson:"title" json:"title,omitempty"`
-	Articles []ArticleSerieArticle `xml:"Articles>Article" bson:"articles" json:"articles,omitempty"`
-}
-
-type ArticleSerieArticle struct {
-	Title    string `xml:"Title" bson:"title" json:"title,omitempty"`
-	Preamble string `xml:"Preamble" bson:"preamble" json:"preamble,omitempty"`
-	Image    string `xml:"Image" bson:"image" json:"image,omitempty"`
-	Pubdate  string `xml:"Pubdate" bson:"pubdate" json:"pubdate,omitempty"`
-	Location string `xml:"Location" bson:"location" json:"location,omitempty"`
-	Internal bool   `xml:"Internal" bson:"internal" json:"internal,omitempty"`
-}
+// type ArticleExport struct {
+// 	Id           bson.ObjectId `bson:"_id,omitempty" json:"mid"`
+// 	OriginID     string        `xml:"id,attr" json:"id"`
+// 	OriginalLink string        `xml:"StandardArticleOriginalLink" json:"originallink"`
+// 	OriginSource string        `bson:"originsource" json:"originsource"`
+// 	Title        string        `xml:"StandardArticleTitle" json:"title"`
+// 	Subtitle     string        `xml:"StandardArticleSubTitle" json:"subtitle"`
+// 	Preamble     string        `xml:"StandardArticlePreamble" json:"preamble"`
+// 	Body         string        `xml:"StandardArticleBody" json:"content"`
+// 	Image        string        `xml:"StandardArticleImage>StandardArticleImagePath" json:"image" bson:"image"`
+// 	ImageByline  string        `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline" bson:"imagebyline"`
+// 	//ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages" bson:"articleimages"`
+// 	//ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum" bson:"imagealbum"`
+// 	Category    string             `xml:"StandardArticleCategory" json:"category" bson:"category"`
+// 	Pubdate     time.Time          `json:"pubdate" bson:"pubdate"`
+// 	Moddate     time.Time          `json:"moddate" bson:"moddate"`
+// 	Location    string             `xml:"Location" json:"location" bson:"location"`
+// 	Latitude    string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude" bson:"latitude"`
+// 	Longitude   string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude" bson:"longitude"`
+// 	Department  string             `xml:"ArticleDepartment" json:"department"`
+// 	Teaser      ArticleTeaser      `xml:"StandardArticleTeaser" json:"teaser"`
+// 	ExtraTeaser ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" json:"extrateaser"`
+// 	Byline      []ArticleByline    `xml:"StandardArticleBylines>StandardArticleByline" json:"bylines"`
+// 	//Links           []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks"`
+// 	CommentsEnabled string `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
+// 	CommentsTitle   string `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle"`
+// 	//Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments"`
+// 	//Facts           []ArticleFact      `xml:"StandardArticleFacts>StandardArticleFact" json:"facts"`
+// 	//BackgroundFacts []ArticleFact      `xml:"StandardArticleBackgroundFacts>StandardArticleBackgroundFact" json:"backgroundfacts"`
+// 	LastMod    time.Time    `json:"lastmod" bson:"lastmod"`
+// 	Video      ArticleVideo `xml:"PicSearchVideo" bson:"video" json:"video"`
+// 	TopContent string       `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent"`
+// }
 
 /*
  * Teaser article
@@ -134,34 +153,34 @@ type ArticleSection struct {
  * Article parts
  */
 type ArticleTeaser struct {
-	Image       string `xml:"StandardArticleTeaserImage>StandardArticleTeaserImagePath" json:"image,omitempty"`
-	ImageByline string `xml:"StandardArticleTeaserImage>StandardArticleTeaserImagePhotographer" json:"imagebyline,omitempty"`
-	Title       string `xml:"StandardArticleTeaserTitle" json:"title,omitempty"`
-	Body        string `xml:"StandardArticleTeaserBody" json:"body,omitempty"`
+	Image       string `xml:"StandardArticleTeaserImage>StandardArticleTeaserImagePath" json:"image"`
+	ImageByline string `xml:"StandardArticleTeaserImage>StandardArticleTeaserImagePhotographer" json:"imagebyline"`
+	Title       string `xml:"StandardArticleTeaserTitle" json:"title"`
+	Body        string `xml:"StandardArticleTeaserBody" json:"body"`
 }
 
 type ArticleExtraTeaser struct {
-	Title string `xml:"StandardArticleExtraTeaserTitle" json:"title,omitempty"`
-	Body  string `xml:"StandardArticleExtraTeaserBody" json:"body,omitempty"`
+	Title string `xml:"StandardArticleExtraTeaserTitle" json:"title"`
+	Body  string `xml:"StandardArticleExtraTeaserBody" json:"body"`
 }
 
 type ArticleByline struct {
-	Name       string `xml:"Name" json:"name,omitempty"`
-	Email      string `xml:"Email" json:"email,omitempty"`
-	Phone      string `xml:"Phone" json:"phone,omitempty"`
-	Role       string `xml:"OccupationalRole" json:"role,omitempty"`
-	Image      string `xml:"ImagePath" json:"image,omitempty"`
-	Department string `xml:"Department" json:"department,omitempty"`
+	Name       string `xml:"Name" json:"name"`
+	Email      string `xml:"Email" json:"email"`
+	Phone      string `xml:"Phone" json:"phone"`
+	Role       string `xml:"OccupationalRole" json:"role"`
+	Image      string `xml:"ImagePath" json:"image"`
+	Department string `xml:"Department" json:"department"`
 }
 
 type ArticleLinks struct {
-	Title    string `xml:"Title" json:"title,omitempty"`
-	Internal bool   `xml:"Internal" json:"is_internal,omitempty"`
-	Url      string `xml:"Url" json:"url,omitempty"`
-	Image    string `xml:"Image" json:"image,omitempty"`
-	Pubdate  string `xml:"PubDate" json:"pubdate,omitempty"`
-	Preamble string `xml:"Preamble" json:"preamble,omitempty"`
-	Category string `xml:"Category" json:"category,omitempty"`
+	Title    string `xml:"Title" json:"title"`
+	Internal bool   `xml:"Internal" json:"is_internal"`
+	Url      string `xml:"Url" json:"url"`
+	Image    string `xml:"Image" json:"image"`
+	Pubdate  string `xml:"PubDate" json:"pubdate"`
+	Preamble string `xml:"Preamble" json:"preamble"`
+	Category string `xml:"Category" json:"category"`
 }
 
 type ArticleComments struct {
@@ -170,17 +189,17 @@ type ArticleComments struct {
 	Body      string `xml:"Body" json:"body"`
 	Author    string `xml:"Author>AliasOrFullName" json:"author"`
 	Pubdate   string `xml:"PublicationDate" json:"pubdate"`
-	BodyQuote string `xml:"BodyQuote" json:"quoted,omitempty"`
+	BodyQuote string `xml:"BodyQuote" json:"quoted"`
 }
 
 type ArticleVideo struct {
-	Title        string                `xml:"PicSearchVideoTitle" json:"title,omitempty"`
-	Description  string                `xml:"PicSearchVideoDescription" json:"description,omitempty"`
-	Category     string                `xml:"PicSearchVideoCategory" json:"category,omitempty"`
-	ThumbnailUrl string                `xml:"PicSearchVideoThumbNail" json:"tumbnailurl,omitempty"`
-	Publishdate  string                `xml:"PicSearchVideoPublishDate" json:"publishdate,omitempty"`
-	MediaId      string                `xml:"PicSearchVideoMediaId" json:"mediaid,omitempty"`
-	Streams      []ArticleVideoStreams `xml:"PicSearchMediaStreams>PicSearchMediaStream" json:"streams,omitempty"`
+	Title        string                `xml:"PicSearchVideoTitle" json:"title"`
+	Description  string                `xml:"PicSearchVideoDescription" json:"description"`
+	Category     string                `xml:"PicSearchVideoCategory" json:"category"`
+	ThumbnailUrl string                `xml:"PicSearchVideoThumbNail" json:"tumbnailurl"`
+	Publishdate  string                `xml:"PicSearchVideoPublishDate" json:"publishdate"`
+	MediaId      string                `xml:"PicSearchVideoMediaId" json:"mediaid"`
+	Streams      []ArticleVideoStreams `xml:"PicSearchMediaStreams>PicSearchMediaStream" json:"streams"`
 }
 
 type ArticleVideoStreams struct {
@@ -189,38 +208,38 @@ type ArticleVideoStreams struct {
 }
 
 type ArticleImage struct {
-	Url          string `xml:"ImageUrl" json:"url,omitempty"`
-	Title        string `xml:"ImageTitle" json:"title,omitempty"`
-	Text         string `xml:"ImageText" json:"text,omitempty"`
-	Photographer string `xml:"ImagePhotographer" json:"photographer,omitempty"`
-	ShowTitle    string `xml:"ImageShowTitle" json:"showtitle,omitempty"`
+	Url          string `xml:"ImageUrl" json:"url"`
+	Title        string `xml:"ImageTitle" json:"title"`
+	Text         string `xml:"ImageText" json:"text"`
+	Photographer string `xml:"ImagePhotographer" json:"photographer"`
+	ShowTitle    string `xml:"ImageShowTitle" json:"showtitle"`
 }
 
 type ArticleImageAlbum struct {
-	Id                 string                   `xml:"id,attr" json:"id,omitempty"`
-	Title              string                   `xml:"ImageAlbumTitle" json:"title,omitempty"`
-	Description        string                   `xml:"ImageAlbumDescription" json:"description,omitempty"`
-	Images             []ArticleImageAlbumImage `xml:"ImageAlbumImages>ImageAlbumImage" json:"images,omitempty"`
-	AllowComments      string                   `xml:"ImageAlbumAllowComments" json:"allowcomments,omitempty"`
-	JsonUrl            string                   `xml:"ImageAlbumJsonUrl" json:"jsonurl,omitempty"`
-	SharingLink        string                   `xml:"ImageAlbumSharingLink" json:"sharinglink,omitempty"`
-	TeaserTitle        string                   `xml:"ImageAlbumTeaserImage>ImageAlbumImage>ImageAlbumImageTitle" json:"teasertitle,omitempty"`
-	TeaserDesc         string                   `xml:"ImageAlbumTeaserImage>ImageAlbumImage>ImageAlbumImageDescription" json:"teaserdesc,omitempty"`
-	TeaserPhotographer string                   `xml:"ImageAlbumTeaserImage>ImageAlbumImage>ImageAlbumImagePhotographer" json:"teaserphotographer,omitempty"`
-	TeaserImagePath    string                   `xml:"ImageAlbumTeaserImage>ImageAlbumImage>ImageAlbumImagePath" json:"teaserimagepath,omitempty"`
+	Id                 string                   `xml:"id,attr" json:"id"`
+	Title              string                   `xml:"ImageAlbumTitle" json:"title"`
+	Description        string                   `xml:"ImageAlbumDescription" json:"description"`
+	Images             []ArticleImageAlbumImage `xml:"ImageAlbumImages>ImageAlbumImage" json:"images"`
+	AllowComments      string                   `xml:"ImageAlbumAllowComments" json:"allowcomments"`
+	JsonUrl            string                   `xml:"ImageAlbumJsonUrl" json:"jsonurl"`
+	SharingLink        string                   `xml:"ImageAlbumSharingLink" json:"sharinglink"`
+	TeaserTitle        string                   `xml:"ImageAlbumTeaserImage>ImageAlbumImage>ImageAlbumImageTitle" json:"teasertitle"`
+	TeaserDesc         string                   `xml:"ImageAlbumTeaserImage>ImageAlbumImage>ImageAlbumImageDescription" json:"teaserdesc"`
+	TeaserPhotographer string                   `xml:"ImageAlbumTeaserImage>ImageAlbumImage>ImageAlbumImagePhotographer" json:"teaserphotographer"`
+	TeaserImagePath    string                   `xml:"ImageAlbumTeaserImage>ImageAlbumImage>ImageAlbumImagePath" json:"teaserimagepath"`
 }
 
 type ArticleImageAlbumImage struct {
-	Id           string `xml:"id,attr" json:"id,omitempty"`
-	Title        string `xml:"ImageAlbumImageTitle" json:"title,omitempty"`
-	Description  string `xml:"ImageAlbumImageDescription" json:"description,omitempty"`
-	Photographer string `xml:"ImageAlbumImagePhotographer" json:"photographer,omitempty"`
-	ImagePath    string `xml:"ImageAlbumImagePath" json:"imagepath,omitempty"`
+	Id           string `xml:"id,attr" json:"id"`
+	Title        string `xml:"ImageAlbumImageTitle" json:"title"`
+	Description  string `xml:"ImageAlbumImageDescription" json:"description"`
+	Photographer string `xml:"ImageAlbumImagePhotographer" json:"photographer"`
+	ImagePath    string `xml:"ImageAlbumImagePath" json:"imagepath"`
 }
 
 type ArticleFact struct {
-	Title string `xml:"Title" json:"title,omitempty"`
-	Body  string `xml:"Body" json:"body,omitempty"`
+	Title string `xml:"Title" json:"title"`
+	Body  string `xml:"Body" json:"body"`
 }
 
 /*
