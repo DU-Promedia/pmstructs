@@ -3,10 +3,8 @@ package pmstructs
 import (
 	"log"
 	"net/url"
-	//"strings"
 	"time"
 
-	//"github.com/PuerkitoBio/goquery"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
