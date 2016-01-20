@@ -407,22 +407,28 @@ func (a *Article) UpdateShares(db *mgo.Database) {
 
 		err := sharesCollection.Find(findQuery).Sort("-date").Limit(1).One(&shares)
 		if err != nil {
-			//log.Println("Found no shares for article", a.Id)
+			log.Println("Found no shares for article", a.Id)
 			return
 		}
 
 		// Check the ID
 		if shares.Id.Valid() == false {
-			log.Println("No share id thats calid found")
+			log.Println("No share id thats valid found")
 			return
 		}
 
-		// Update article with share count
-		updateQuery := bson.M{"$set": bson.M{"shares": shares}}
+		if shares.FB.Shares > 0 {
+			// Update article with share count
+			set := bson.M{"shares": shares}
+			updateQuery := bson.M{"$set": set}
 
-		err = collection.UpdateId(a.Id, updateQuery)
-		if err != nil {
-			log.Println("Could not update shares for", a.Id)
+			err = collection.Update(bson.M{"_id": a.Id}, updateQuery)
+			if err != nil {
+				log.Println("Could not update shares for", a.Id)
+				return
+			}
+
+			a.Shares = shares
 		}
 	}
 }
