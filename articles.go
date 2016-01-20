@@ -3,6 +3,7 @@ package pmstructs
 import (
 	"log"
 	"net/url"
+	"regexp"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -70,6 +71,7 @@ type ArticleSerie struct {
 }
 
 type ArticleSerieArticle struct {
+	OriginID   string    `bson:"originid" json:"id"`
 	Title      string    `xml:"Title" bson:"title" json:"title,omitempty"`
 	Preamble   string    `xml:"Preamble" bson:"preamble" json:"preamble,omitempty"`
 	Link       string    `xml:"Link" bson:"link" json:"link,omitempty"`
@@ -265,6 +267,7 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 		for ix, art := range a.Serie.Articles {
 			if len(art.RawPubdate) > 0 {
 				a.Serie.Articles[ix].Pubdate, _ = time.Parse(time.RFC1123Z, art.RawPubdate)
+				a.Serie.Articles[ix].OriginID = GetOriginIdFromUrl(art.Link)
 			}
 		}
 	}
@@ -449,4 +452,11 @@ func (a *Article) UpdateTags(db *mgo.Database) {
 	if err := collection.Update(docToUpdate, a); err != nil {
 		log.Println("Article UpdateTags: Could not update:", err)
 	}
+}
+
+func GetOriginIdFromUrl(s string) string {
+	r, _ := regexp.Compile(`(1.[0-9])\w+`)
+	match := r.FindString(s)
+
+	return match
 }
