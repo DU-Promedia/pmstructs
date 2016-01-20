@@ -72,6 +72,7 @@ type ArticleSerie struct {
 type ArticleSerieArticle struct {
 	Title      string    `xml:"Title" bson:"title" json:"title,omitempty"`
 	Preamble   string    `xml:"Preamble" bson:"preamble" json:"preamble,omitempty"`
+	Link       string    `xml:"Link" bson:"link" json:"link,omitempty"`
 	Image      string    `xml:"Image" bson:"image" json:"image,omitempty"`
 	Pubdate    time.Time `bson:"pubdate" json:"pubdate,omitempty"`
 	RawPubdate string    `xml:"PubDate" bson:"-" json:"-"`
