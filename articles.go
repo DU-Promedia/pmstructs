@@ -11,52 +11,54 @@ import (
 
 /*
  * Complete article
+ * Fimpa sections
+
  */
 type Article struct {
-	Id              bson.ObjectId      `bson:"_id,omitempty" json:"mid"`
-	OriginID        string             `xml:"id,attr" json:"id"`
-	OriginalLink    string             `xml:"StandardArticleOriginalLink" json:"originallink"`
-	OriginSource    string             `bson:"originsource" json:"originsource"`
-	Title           string             `xml:"StandardArticleTitle" json:"title"`
+	Id              bson.ObjectId      `bson:"_id,omitempty" json:"mid"`                       // OUT
+	OriginID        string             `xml:"id,attr" json:"id"`                               // OUT
+	OriginalLink    string             `xml:"StandardArticleOriginalLink" json:"originallink"` // OUT
+	OriginSource    string             `bson:"originsource" json:"originsource"`               // OUT
+	Title           string             `xml:"StandardArticleTitle" json:"title"`               // OUT
 	Subtitle        string             `xml:"StandardArticleSubTitle" json:"subtitle,omitempty"`
 	Supertitle      string             `xml:"StandardArticleSuperTitle" json:"supertitle,omitempty"`
-	Preamble        string             `xml:"StandardArticlePreamble" json:"preamble"`
-	Body            string             `xml:"StandardArticleBody" json:"content"`
+	Preamble        string             `xml:"StandardArticlePreamble" json:"preamble"` // OUT
+	Body            string             `xml:"StandardArticleBody" json:"content"`      // OUT
 	BodyParts       []string           `bson:"contentparts,omitempty" json:"contentparts,omitempty"`
 	Image           string             `xml:"StandardArticleImage>StandardArticleImagePath" json:"image,omitempty" bson:"image"`
 	ImageByline     string             `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline,omitempty" bson:"imagebyline"`
 	ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages,omitempty" bson:"articleimages"`
 	ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum,omitempty" bson:"imagealbum"`
-	Category        string             `xml:"StandardArticleCategory" json:"category,omitempty"`
+	Category        string             `xml:"StandardArticleCategory" json:"category,omitempty"` // OUT
 	ArticleType     string             `xml:"StandardArticleType" bson:"articletype" json:"-"`
 	ArticleInfo     string             `xml:"StandardArticleInfo" bson:"articleinfo" json:"-"`
-	PubdateRaw      string             `xml:"StandardArticlePubDate" json:"-"`
-	ModdateRaw      string             `xml:"StandardArticlePubModDate" json:"-"`
+	PubdateRaw      string             `xml:"StandardArticlePubDate" bson:"-" json:"-"`
+	ModdateRaw      string             `xml:"StandardArticlePubModDate" bson:"-" json:"-"`
 	Pubdate         time.Time          `json:"pubdate" bson:"pubdate"`
 	Moddate         time.Time          `json:"moddate" bson:"moddate"`
 	Location        string             `xml:"Location" json:"location,omitempty"`
-	Latitude        string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude,omitempty" bson:"latitude"`
-	Longitude       string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude,omitempty" bson:"longitude"`
-	Department      string             `xml:"ArticleDepartment" json:"department,omitempty"`
-	Teaser          ArticleTeaser      `xml:"StandardArticleTeaser" json:"teaser"`
+	Latitude        string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude,omitempty" bson:"latitude"`    // OUT
+	Longitude       string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude,omitempty" bson:"longitude"` // OUT
+	Department      string             `xml:"ArticleDepartment" json:"department,omitempty"`                                           // OUT
+	Teaser          ArticleTeaser      `xml:"StandardArticleTeaser" json:"teaser"`                                                     // OUT
 	ExtraTeaser     ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" json:"extrateaser"`
 	Byline          []ArticleByline    `xml:"StandardArticleBylines>StandardArticleByline" json:"bylines"`
 	Links           []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks,omitempty"`
 	CommentCount    int                `bson:"commentcount,omitempty" json:"commentcount"`
-	CommentsEnabled string             `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
+	CommentsEnabled bool               `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
 	CommentsTitle   string             `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle,omitempty"`
 	Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments,omitempty"`
 	Facts           []ArticleFact      `xml:"StandardArticleFacts>StandardArticleFact" json:"facts,omitempty"`
 	BackgroundFacts []ArticleFact      `xml:"StandardArticleBackgroundFacts>StandardArticleBackgroundFact" json:"backgroundfacts,omitempty"`
 	Theme           string             `xml:"StandardArticleTheme" json:"-" bson:"theme"`
-	LastMod         time.Time          `json:"lastmod" bson:"lastmod"`
+	LastMod         time.Time          `json:"lastmod" bson:"lastmod"` // OUT
 	ArticleTags     []string           `xml:"StandardArticleKeyWords>StandardArticleKeyWord" json:"articletags,omitempty"`
 	Tags            []string           `json:"-" bson:"tags,omitempty"`
-	Video           ArticleVideo       `xml:"PicSearchVideo" bson:"video" json:"video,omitempty"`
+	Video           ArticleVideo       `xml:"PicSearchVideo" bson:"video" json:"video,omitempty"` // OUT
 	TopContent      string             `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent,omitempty"`
 	Sections        []ArticleSection   `bson:"sections" json:"sections,omitempty"`
-	Shares          ArticleShares      `bson:"shares" json:"shares,omitempty"`
-	Serie           ArticleSerie       `xml:"StandardArticleArticleSeries>ArticleSerie" bson:"serie" json:"serie,omitempty"`
+	Shares          ArticleShares      `bson:"shares" json:"shares,omitempty"`                                               // OUT
+	Serie           ArticleSerie       `xml:"StandardArticleArticleSeries>ArticleSerie" bson:"serie" json:"serie,omitempty"` // OUT
 }
 
 /*
@@ -68,12 +70,13 @@ type ArticleSerie struct {
 }
 
 type ArticleSerieArticle struct {
-	Title    string `xml:"Title" bson:"title" json:"title,omitempty"`
-	Preamble string `xml:"Preamble" bson:"preamble" json:"preamble,omitempty"`
-	Image    string `xml:"Image" bson:"image" json:"image,omitempty"`
-	Pubdate  string `xml:"Pubdate" bson:"pubdate" json:"pubdate,omitempty"`
-	Location string `xml:"Location" bson:"location" json:"location,omitempty"`
-	Internal bool   `xml:"Internal" bson:"internal" json:"internal,omitempty"`
+	Title      string    `xml:"Title" bson:"title" json:"title,omitempty"`
+	Preamble   string    `xml:"Preamble" bson:"preamble" json:"preamble,omitempty"`
+	Image      string    `xml:"Image" bson:"image" json:"image,omitempty"`
+	Pubdate    time.Time `bson:"pubdate" json:"pubdate,omitempty"`
+	RawPubdate string    `xml:"PubDate" bson:"-" json:"-"`
+	Location   string    `xml:"Location" bson:"location" json:"location,omitempty"`
+	Internal   bool      `xml:"Internal" bson:"internal" json:"internal,omitempty"`
 }
 
 /*
@@ -163,12 +166,13 @@ type ArticleLinks struct {
 }
 
 type ArticleComments struct {
-	ID        string `xml:"id,attr" json:"id"`
-	Title     string `xml:"Title" json:"title"`
-	Body      string `xml:"Body" json:"body"`
-	Author    string `xml:"Author>AliasOrFullName" json:"author"`
-	Pubdate   string `xml:"PublicationDate" json:"pubdate"`
-	BodyQuote string `xml:"BodyQuote" json:"quoted,omitempty"`
+	ID         string    `xml:"id,attr" json:"id"`
+	Title      string    `xml:"Title" json:"title"`
+	Body       string    `xml:"Body" json:"body"`
+	Author     string    `xml:"Author>AliasOrFullName" json:"author"`
+	Pubdate    time.Time `bson:"pubdate" json:"pubdate"`
+	RawPubdate string    `xml:"PublicationDate" bson:"-" json:"-"`
+	BodyQuote  string    `xml:"BodyQuote" json:"quoted,omitempty"`
 }
 
 type ArticleVideo struct {
@@ -229,12 +233,40 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 	sectCol := db.C("sections")
 
 	a.LastMod = time.Now()
-	a.Pubdate, _ = time.Parse(time.RFC1123Z, a.PubdateRaw)
-	a.Moddate, _ = time.Parse(time.RFC1123Z, a.ModdateRaw)
+	if len(a.PubdateRaw) > 0 {
+		a.Pubdate, _ = time.Parse(time.RFC1123Z, a.PubdateRaw)
+	}
+
+	if len(a.ModdateRaw) > 0 {
+		a.Moddate, _ = time.Parse(time.RFC1123Z, a.ModdateRaw)
+	}
+
+	if a.Moddate.Before(a.Pubdate) {
+		a.Moddate = a.Pubdate
+	}
 
 	arturl, _ := url.Parse(a.OriginalLink)
 	a.OriginSource = arturl.Host
+
+	// Comments
 	a.CommentCount = len(a.Comments)
+
+	if len(a.Comments) > 0 {
+		for ix, com := range a.Comments {
+			if len(com.RawPubdate) > 0 {
+				a.Comments[ix].Pubdate, _ = time.Parse(time.RFC1123Z, com.RawPubdate)
+			}
+		}
+	}
+
+	// Article serie
+	if len(a.Serie.Articles) > 0 {
+		for ix, art := range a.Serie.Articles {
+			if len(art.RawPubdate) > 0 {
+				a.Serie.Articles[ix].Pubdate, _ = time.Parse(time.RFC1123Z, art.RawPubdate)
+			}
+		}
+	}
 
 	// Find Document
 	docToUpdate := bson.M{"originid": a.OriginID}

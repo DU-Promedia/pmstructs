@@ -22,6 +22,11 @@ type ArticleListWrapper struct {
 	TheList ArticleList `xml:"MobileContentBlocks"`
 }
 
+// func (a *ArticleListWrapper) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+// 	log.Println(d)
+// 	return nil
+// }
+
 type ArticleList struct {
 	ID          bson.ObjectId `bson:"_id,omitempty" json:"mid"`
 	OriginID    string        `xml:"id,attr" bson:"originid" json:"id"`
