@@ -35,14 +35,14 @@ type Article struct {
 	ArticleInfo     string             `xml:"StandardArticleInfo" bson:"articleinfo" json:"-"`
 	PubdateRaw      string             `xml:"StandardArticlePubDate" bson:"-" json:"-"`
 	ModdateRaw      string             `xml:"StandardArticlePubModDate" bson:"-" json:"-"`
-	Pubdate         time.Time          `json:"pubdate" bson:"pubdate"`
-	Moddate         time.Time          `json:"moddate" bson:"moddate"`
+	Pubdate         time.Time          `json:"pubdate,omitempty" bson:"pubdate"`
+	Moddate         time.Time          `json:"moddate,omitempty" bson:"moddate"`
 	Location        string             `xml:"Location" json:"location,omitempty"`
 	Latitude        string             `xml:"StandardArticleGeo>StandardArticleLatitude" json:"latitude,omitempty" bson:"latitude"`    // OUT
 	Longitude       string             `xml:"StandardArticleGeo>StandardArticleLongitude" json:"longitude,omitempty" bson:"longitude"` // OUT
 	Department      string             `xml:"ArticleDepartment" json:"department,omitempty"`                                           // OUT
 	Teaser          ArticleTeaser      `xml:"StandardArticleTeaser" json:"teaser"`                                                     // OUT
-	ExtraTeaser     ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" json:"extrateaser"`
+	ExtraTeaser     ArticleExtraTeaser `xml:"StandardArticleExtraTeaser" bson:"extrateaser" json:"-"`
 	Byline          []ArticleByline    `xml:"StandardArticleBylines>StandardArticleByline" json:"bylines"`
 	Links           []ArticleLinks     `xml:"StandardArticleLinks>Link" json:"articlelinks,omitempty"`
 	CommentCount    int                `bson:"commentcount,omitempty" json:"commentcount"`
@@ -57,9 +57,9 @@ type Article struct {
 	Tags            []string           `json:"-" bson:"tags,omitempty"`
 	Video           ArticleVideo       `xml:"PicSearchVideo" bson:"video" json:"video,omitempty"` // OUT
 	TopContent      string             `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent,omitempty"`
-	Sections        []ArticleSection   `bson:"sections" json:"sections,omitempty"`
 	Shares          ArticleShares      `bson:"shares" json:"shares,omitempty"`                                               // OUT
 	Serie           ArticleSerie       `xml:"StandardArticleArticleSeries>ArticleSerie" bson:"serie" json:"serie,omitempty"` // OUT
+	//Sections        []ArticleSection   `bson:"sections" json:"sections,omitempty"`
 }
 
 /*
@@ -83,22 +83,6 @@ type ArticleSerieArticle struct {
 }
 
 /*
- * Teaser article
- */
-type TeaserArticle struct {
-	Id       bson.ObjectId `bson:"_id,omitempty" json:"mid"`
-	OriginID string        `xml:"id,attr" json:"id"`
-	Image    string        `xml:"TeaserArticleImage>TeaserArticleImagePath" json:"image"`
-	Title    string        `xml:"TeaserArticleTitle" json:"title"`
-	Subtitle string        `xml:"TeaserArticleSubTitle" json:"subtitle"`
-	Preamble string        `xml:"TeaserArticlePreamble" json:"preamble"`
-	Body     string        `xml:"TeaserArticleBody" json:"body"`
-	Internal string        `xml:"Internal" json:"internal"`
-	Link     string        `xml:"TeaserArticleExternal>TeaserArticleExternalLink" json:"link"`
-	Linktext string        `xml:"TeaserArticleExternal>TeaserArticleExternalLinkName" json:"linktext"`
-}
-
-/*
  * Article references used in sections
  */
 type ArticleRef struct {
@@ -114,16 +98,16 @@ type ArticlePoll struct {
 */
 
 type ArticleShares struct {
-	Id        bson.ObjectId `bson:"_id,omitempty" json:"id"`
-	ArticleID bson.ObjectId `bson:"articleid,omitempty" json:"articleid"`
-	Origin    string        `bson:"origin" json:"origin"`
-	Date      time.Time     `bson:"date" json:"date"`
+	Id        bson.ObjectId `bson:"_id,omitempty" json:"id,omitempty"`
+	ArticleID bson.ObjectId `bson:"articleid,omitempty" json:"articleid,omitempty"`
+	Origin    string        `bson:"origin" json:"origin,omitempty"`
+	Date      time.Time     `bson:"date" json:"date,omitempty"`
 	FB        struct {
-		Shares int `bson:"shares" json:"shares"`
-	} `bson:"fb" json:"fb"`
+		Shares int `bson:"shares" json:"shares,omitempty"`
+	} `bson:"fb" json:"fb,omitempty"`
 	Twitter struct {
-		Shares int `bson:"shares" json:"shares"`
-	} `bson:"twitter" json:"twitter"`
+		Shares int `bson:"shares" json:"shares,omitempty"`
+	} `bson:"twitter" json:"twitter,omitempty"`
 }
 
 /*
@@ -135,6 +119,17 @@ type ArticleSection struct {
 }
 
 /*
+ * Teaser article
+ */
+type TeaserArticle struct {
+	OriginID string `xml:"id,attr" bson:"originid" json:"id"`
+	Image    string `xml:"TeaserArticleImage>TeaserArticleImagePath" bson:"image" json:"image,omitempty"`
+	Title    string `xml:"TeaserArticleTitle" bson:"title" json:"title"`
+	Body     string `xml:"TeaserArticlePreamble" bson:"body" json:"body,omitempty"`
+	Link     string `xml:"TeaserArticleExternal>TeaserArticleExternalLink" bson:"link" json:"link,omitempty"`
+}
+
+/*
  * Article parts
  */
 type ArticleTeaser struct {
@@ -142,6 +137,7 @@ type ArticleTeaser struct {
 	ImageByline string `xml:"StandardArticleTeaserImage>StandardArticleTeaserImagePhotographer" json:"imagebyline,omitempty"`
 	Title       string `xml:"StandardArticleTeaserTitle" json:"title,omitempty"`
 	Body        string `xml:"StandardArticleTeaserBody" json:"body,omitempty"`
+	Link        string `bson:"link" json:"link,omitempty"`
 }
 
 type ArticleExtraTeaser struct {
@@ -233,7 +229,6 @@ type ArticleFact struct {
  */
 func (a *Article) SaveToDB(db *mgo.Database) {
 	collection := db.C("articles")
-	sectCol := db.C("sections")
 
 	a.LastMod = time.Now()
 	if len(a.PubdateRaw) > 0 {
@@ -296,6 +291,7 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 
 	// Fields that we set somewhere else ...
 	a.Tags = savedArticle.Tags
+	//a.Shares = savedArticle.Shares
 
 	if len(a.Id) == 0 {
 		if len(savedArticle.Id) > 0 {
@@ -303,37 +299,37 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 		}
 	}
 
-	if len(a.Id) > 0 {
-		// Find sections with article in it
-		findSections := bson.M{"articlelist": bson.M{"$elemMatch": bson.M{"articleid": a.Id}}}
-		sects := []ArticleListCommon{}
+	// if len(a.Id) > 0 {
+	// 	// Find sections with article in it
+	// 	findSections := bson.M{"articlelist": bson.M{"$elemMatch": bson.M{"articleid": a.Id}}}
+	// 	sects := []ArticleListCommon{}
 
-		err = sectCol.Find(findSections).All(&sects)
-		if err != nil {
-			log.Println("Article SaveToDB: Found no sections:", err)
-		} else {
-			// Reset sections, janitor should remove old articles
-			a.Sections = []ArticleSection{}
+	// 	err = sectCol.Find(findSections).All(&sects)
+	// 	if err != nil {
+	// 		log.Println("Article SaveToDB: Found no sections:", err)
+	// 	} else {
+	// 		// Reset sections, janitor should remove old articles
+	// 		a.Sections = []ArticleSection{}
 
-			// Loop sections
-			for _, s := range sects {
-				// Create new Article sections and set section id as reference
-				aSect := ArticleSection{}
-				aSect.SectionID = s.ID
+	// 		// Loop sections
+	// 		for _, s := range sects {
+	// 			// Create new Article sections and set section id as reference
+	// 			aSect := ArticleSection{}
+	// 			aSect.SectionID = s.ID
 
-				// Loop all articles in sections article list
-				for placement, sp := range s.ArticleList {
-					// Check if sections article list have the article
-					if sp.ArticleID.String() == a.Id.String() {
-						aSect.Placement = placement
-						break
-					}
-				}
+	// 			// Loop all articles in sections article list
+	// 			for placement, sp := range s.ArticleList {
+	// 				// Check if sections article list have the article
+	// 				if sp.ArticleID.String() == a.Id.String() {
+	// 					aSect.Placement = placement
+	// 					break
+	// 				}
+	// 			}
 
-				a.Sections = append(a.Sections, aSect)
-			}
-		}
-	}
+	// 			a.Sections = append(a.Sections, aSect)
+	// 		}
+	// 	}
+	// }
 
 	// Parse body!
 	// rr := strings.NewReader(a.Body)
@@ -389,7 +385,7 @@ func (a *Article) LoadArticleByOriginId(id string, db *mgo.Database) bool {
 
 	err := collection.Find(query).One(&a)
 	if err != nil {
-		log.Println("LoadArticleById: Could not load article:", err)
+		log.Println("LoadArticleByOriginId: Could not load article:", err)
 		return false
 	}
 
@@ -407,13 +403,13 @@ func (a *Article) UpdateShares(db *mgo.Database) {
 
 		err := sharesCollection.Find(findQuery).Sort("-date").Limit(1).One(&shares)
 		if err != nil {
-			log.Println("Found no shares for article", a.Id)
+			//log.Println("Found no shares for article", a.Id)
 			return
 		}
 
 		// Check the ID
 		if shares.Id.Valid() == false {
-			log.Println("No share id thats valid found")
+			//log.Println("No share id thats valid found")
 			return
 		}
 

@@ -2,7 +2,7 @@ package pmstructs
 
 import (
 	"encoding/xml"
-	"log"
+	// "log"
 	//	"net/url"
 
 	"gopkg.in/mgo.v2"
@@ -22,11 +22,6 @@ type ArticleListWrapper struct {
 	TheList ArticleList `xml:"MobileContentBlocks"`
 }
 
-// func (a *ArticleListWrapper) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-// 	log.Println(d)
-// 	return nil
-// }
-
 type ArticleList struct {
 	ID          bson.ObjectId `bson:"_id,omitempty" json:"mid"`
 	OriginID    string        `xml:"id,attr" bson:"originid" json:"id"`
@@ -34,7 +29,10 @@ type ArticleList struct {
 	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
-	Articles    []Article     `xml:"MobileContentBlock>StandardArticle" bson:"-" json:"-"`
+	Articles    []struct {
+		Article Article       `xml:"StandardArticle" bson:"-" json:"-"`
+		Simple  TeaserArticle `xml:"TeaserArticle" bson:"-" json:"-"`
+	} `xml:"MobileContentBlock" bson:"-" json:"-"`
 }
 
 type ArticleContentPlacement struct {
@@ -45,7 +43,10 @@ type ArticleContentPlacement struct {
 	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
-	Articles    []Article     `xml:"StandardArticle" bson:"-"`
+	Articles    []struct {
+		Article Article       `xml:"StandardArticle" bson:"-" json:"-"`
+		Simple  TeaserArticle `xml:"TeaserArticle" bson:"-" json:"-"`
+	} `xml:",any" bson:"-" json:"-"`
 }
 
 type ArticleStatisticsList struct {
@@ -56,28 +57,28 @@ type ArticleStatisticsList struct {
 	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
-	Articles    []Article     `xml:"List>ListItem>StandardArticle" bson:"-" json:"-"`
+	Articles    []struct {
+		Article Article       `xml:"StandardArticle" bson:"-" json:"-"`
+		Simple  TeaserArticle `xml:"TeaserArticle" bson:"-" json:"-"`
+	} `xml:"List>ListItem" bson:"-" json:"-"`
 }
 
 /*
  * ContentPlacements
  */
 func (list *ArticleContentPlacement) Save(db *mgo.Database) {
-	log.Println("Saving ArticleContentPlacement:", list.Url)
-
 	common := ArticleListCommon{}
 	common.Url = list.Url
 	common.Type = list.Type
 	common.Origin = list.Origin
 	common.Type = list.Type
 	common.ArticleList = list.ArticleList
-	common.Articles = list.Articles
+	//common.Articles = list.Articles
 
 	common.Save(db)
 }
 
 func (list *ArticleContentPlacement) SaveToDB(db *mgo.Database) {
-
 	// Save to db
 	list.Save(db)
 
@@ -85,102 +86,120 @@ func (list *ArticleContentPlacement) SaveToDB(db *mgo.Database) {
 
 	list.ArticleList = []ArticleRef{}
 
-	for _, a := range list.Articles {
+	for _, list_a := range list.Articles {
 		i++
 
-		a.SaveToDB(db)
+		if len(list_a.Article.OriginID) > 0 {
+			a := list_a.Article
+			a.SaveToDB(db)
 
-		artRef := ArticleRef{}
-		artRef.ArticleID = a.Id
-		list.ArticleList = append(list.ArticleList, artRef)
+			artRef := ArticleRef{}
+			artRef.ArticleID = a.Id
+			list.ArticleList = append(list.ArticleList, artRef)
 
-		a.SaveToDB(db)
+			a.SaveToDB(db)
+		} else if len(list_a.Simple.Title) > 0 {
+			a := Article{}
+			b := list_a.Simple
+
+			a.OriginID = b.OriginID
+			a.Teaser = ArticleTeaser{
+				b.Image,
+				"",
+				b.Title,
+				b.Body,
+				b.Link,
+			}
+
+			a.SaveToDB(db)
+
+			artRef := ArticleRef{}
+			artRef.ArticleID = a.Id
+			list.ArticleList = append(list.ArticleList, artRef)
+
+			a.SaveToDB(db)
+		}
 	}
 
 	list.Save(db)
-}
-
-func (list *ArticleContentPlacement) GetArticles() []Article {
-	listOfArticles := make([]Article, 0)
-
-	for _, a := range list.Articles {
-		target := make([]Article, len(listOfArticles)+1)
-		copy(target, listOfArticles)
-		listOfArticles = append(target, a)
-	}
-
-	return listOfArticles
 }
 
 /*
  * Article list
  */
 func (list *ArticleList) Save(db *mgo.Database) {
-	log.Println("Saving ArticleList:", list.Url)
-
 	common := ArticleListCommon{}
 	common.Url = list.Url
 	common.Type = list.Type
 	common.Origin = list.Origin
 	common.Type = list.Type
 	common.ArticleList = list.ArticleList
-	common.Articles = list.Articles
+	//common.Articles = list.Articles
 
 	common.Save(db)
 }
 
 func (list *ArticleList) SaveToDB(db *mgo.Database) {
-
 	list.Save(db)
 
 	i := 0
 
 	list.ArticleList = []ArticleRef{}
 
-	for _, a := range list.Articles {
+	for _, list_a := range list.Articles {
 		i++
 
-		a.SaveToDB(db)
+		if len(list_a.Article.OriginID) > 0 {
+			a := list_a.Article
+			a.SaveToDB(db)
 
-		artRef := ArticleRef{}
-		artRef.ArticleID = a.Id
-		list.ArticleList = append(list.ArticleList, artRef)
+			artRef := ArticleRef{}
+			artRef.ArticleID = a.Id
+			list.ArticleList = append(list.ArticleList, artRef)
 
-		a.SaveToDB(db)
+			a.SaveToDB(db)
+		} else if len(list_a.Simple.Title) > 0 {
+			a := Article{}
+			b := list_a.Simple
+
+			a.OriginID = b.OriginID
+			a.Teaser = ArticleTeaser{
+				b.Image,
+				"",
+				b.Title,
+				b.Body,
+				b.Link,
+			}
+
+			a.SaveToDB(db)
+
+			artRef := ArticleRef{}
+			artRef.ArticleID = a.Id
+			list.ArticleList = append(list.ArticleList, artRef)
+
+			a.SaveToDB(db)
+		}
 	}
 
 	list.Save(db)
-}
-
-func (list *ArticleList) GetArticles() []Article {
-	listOfArticles := make([]Article, 0)
-
-	for _, a := range list.Articles {
-		listOfArticles = append(listOfArticles, a)
-	}
-
-	return listOfArticles
 }
 
 /*
  * StatisticsList
  */
 func (list *ArticleStatisticsList) Save(db *mgo.Database) {
-	log.Println("Saving StatisticsList:", list.Url)
-
 	common := ArticleListCommon{}
 	common.Url = list.Url
 	common.Type = list.Type
 	common.Origin = list.Origin
 	common.Type = list.Type
 	common.ArticleList = list.ArticleList
-	common.Articles = list.Articles
+	//common.Articles = list.Articles
 
 	common.Save(db)
 }
 
 func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
-
 	// Save section
 	list.Save(db)
 
@@ -188,29 +207,40 @@ func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
 
 	list.ArticleList = []ArticleRef{}
 
-	for _, a := range list.Articles {
+	for _, list_a := range list.Articles {
 		i++
 
-		a.SaveToDB(db)
+		if len(list_a.Article.OriginID) > 0 {
+			a := list_a.Article
+			a.SaveToDB(db)
 
-		artRef := ArticleRef{}
-		artRef.ArticleID = a.Id
-		list.ArticleList = append(list.ArticleList, artRef)
+			artRef := ArticleRef{}
+			artRef.ArticleID = a.Id
+			list.ArticleList = append(list.ArticleList, artRef)
 
-		a.SaveToDB(db)
+			a.SaveToDB(db)
+		} else if len(list_a.Simple.Title) > 0 {
+			a := Article{}
+			b := list_a.Simple
+
+			a.OriginID = b.OriginID
+			a.Teaser = ArticleTeaser{
+				b.Image,
+				"",
+				b.Title,
+				b.Body,
+				b.Link,
+			}
+
+			a.SaveToDB(db)
+
+			artRef := ArticleRef{}
+			artRef.ArticleID = a.Id
+			list.ArticleList = append(list.ArticleList, artRef)
+
+			a.SaveToDB(db)
+		}
 	}
 
 	list.Save(db)
-}
-
-func (list *ArticleStatisticsList) GetArticles() []Article {
-	listOfArticles := make([]Article, 0)
-
-	for _, a := range list.Articles {
-		target := make([]Article, len(listOfArticles)+1)
-		copy(target, listOfArticles)
-		listOfArticles = append(target, a)
-	}
-
-	return listOfArticles
 }
