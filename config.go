@@ -141,3 +141,28 @@ func (c *Config) Save(db *mgo.Database) {
 
 	collection.Update(bson.M{"_id": savedConfig.ID}, c)
 }
+
+func (c *Config) GetDUAdminName() string {
+	switch c.Origin {
+	case "na.se":
+		return "na"
+	case "lt.se":
+		return "lt"
+	case "norrteljetidning.se":
+		return "nt"
+	case "vlt.se":
+		return "vlt"
+	case "nynashamnsposten.se":
+		return "np"
+	case "bblat.se":
+		return "bblat"
+	case "fagersta-posten.se":
+		return "fp"
+	case "salaallehanda.com":
+		return "sa"
+	case "avestatidning.com":
+		return "at"
+	}
+
+	return ""
+}
