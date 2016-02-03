@@ -55,6 +55,10 @@ type UADate struct {
 	time.Time
 }
 
+func (u *UADate) GetTime() time.Time {
+	return u.Time
+}
+
 func (u *UADate) UnmarshalJSON(buf []byte) error {
 	const ua_dateform = "2006-01-02 15:04:05"
 	tt, err := time.Parse(ua_dateform, strings.Trim(string(buf), `"`))
@@ -171,7 +175,7 @@ func (u *UARequest) Bake() error {
 	defer u.Response.Body.Close()
 
 	if u.Response.StatusCode != 200 {
-		return errors.New("UARequest Bake returned:" + u.Response.Request.URL.String() + " " + u.Response.Status)
+		return errors.New(u.Origin + " UARequest Bake returned: " + u.Response.Request.URL.String() + " " + u.Response.Status)
 	} else {
 		u.Body, err = ioutil.ReadAll(u.Response.Body)
 		if err != nil {
@@ -191,6 +195,16 @@ func (u *UARequest) GetSingle() error {
 	}
 
 	log.Println(string(u.Body))
+
+	uaresponse := UAPush{}
+
+	err = json.Unmarshal(u.Body, &uaresponse)
+	if err != nil {
+		log.Println("UA GetSingle:", err)
+		return err
+	}
+
+	u.Pushes = append(u.Pushes, uaresponse)
 
 	return nil
 }
