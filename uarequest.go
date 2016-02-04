@@ -14,9 +14,15 @@ import (
 )
 
 var UACredentials = map[string]UACrendtial{
-	"na.se":  UACrendtial{"6ezSTID3RBG2f1sXoCK7yw", "3FJwMEpqSM2cMZVXLbtzzA"},
-	"vlt.se": UACrendtial{"vBGrk0m5R3e-Hc0WxxH_YA", "duZqa-7KSDKGK2nPEdkHnQ"},
-	"lt.se":  UACrendtial{"zH1U18UwQh6Ofo6dmdMuRA", "Jp82jgk6SqWj1gKQwoNrZg"},
+	"na.se":               UACrendtial{"6ezSTID3RBG2f1sXoCK7yw", "3FJwMEpqSM2cMZVXLbtzzA"},
+	"vlt.se":              UACrendtial{"vBGrk0m5R3e-Hc0WxxH_YA", "duZqa-7KSDKGK2nPEdkHnQ"},
+	"lt.se":               UACrendtial{"zH1U18UwQh6Ofo6dmdMuRA", "Jp82jgk6SqWj1gKQwoNrZg"},
+	"norrteljetidning.se": UACrendtial{"VhN0MaqPQOmeLM5SZp_sxA", "mGWVdjHtRoyj0AkROpVdXg"},
+	"salaallehanda.com":   UACrendtial{"doGX9zcWQvmAS-LqjqHUjQ", "sXncBDMNRfOZLeFA7DRNGg"},
+	"nynashamnsposten.se": UACrendtial{"NAwbaLGLR-m5F0-f4y7cOw", "y9YT77wZRF-xOY92jNM_Cg"},
+	"fagersta-posten.se":  UACrendtial{"pHdSefrwRzqGFDlsKfZkgQ", "lQPuf2z-SlChJU8iPYAI6w"},
+	"bblat.se":            UACrendtial{"fb73xuuJRQ2mHs30TC9XRQ", "nhzxiQSNS1eObJsCjL4rAQ"},
+	"avestatidning.com":   UACrendtial{"1aI3Hb-YTTu31cGFw7ZGPA", "m_xuDzxDQXusU9cx2IxAUg"},
 }
 
 type UACrendtial struct {
@@ -193,8 +199,6 @@ func (u *UARequest) GetSingle() error {
 	if err != nil {
 		return err
 	}
-
-	log.Println(string(u.Body))
 
 	uaresponse := UAPush{}
 

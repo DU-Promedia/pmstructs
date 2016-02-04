@@ -2,7 +2,7 @@ package pmstructs
 
 import (
 	"log"
-	// "net/url"
+	"net/url"
 	// "strings"
 	"time"
 
@@ -28,7 +28,7 @@ type Push struct {
 	Date            time.Time     `bson:"date" json:"date"`
 	Alert           string        `bson:"alert" json:"alert"`
 	Url             string        `bson:"url" json:"url"`
-	ArticleRef      ArticleRef    `bson:"articleref" json:"-"`
+	ArticleRef      ArticleRef    `bson:"articleref,omitempty" json:"-"`
 	DeviceTypes     []string      `json:"device_types"`
 	Sends           int           `bson:"sends" json:"sends"`
 	DirectResponses int           `bson:"direct_responses" json:"direct_responses"`
@@ -74,24 +74,30 @@ func (p *Push) Save(db *mgo.Database) {
 		p.Id = result.Id
 	}
 
+	articleid := GetOriginIdFromUrl(p.Url)
+	if len(articleid) > 0 {
+		article := Article{}
+		didFind := article.LoadArticleByOriginId(articleid, db)
+
+		if didFind == false {
+			host, _ := url.Parse(p.Url)
+
+			article.GetArticleFromUrl(host.Host, articleid, db)
+		}
+
+		if article.Id.Valid() {
+			articleref := ArticleRef{}
+			articleref.ArticleID = article.Id
+
+			p.ArticleRef = articleref
+		}
+	}
+
 	if len(p.Id) > 0 {
 		// Update
 		collection.UpsertId(p.Id, p)
 		return
 	} else {
-		articleid := GetOriginIdFromUrl(p.Url)
-		if len(articleid) > 0 {
-			article := Article{}
-			article.LoadArticleByOriginId(articleid, db)
-
-			if article.Id.Valid() {
-				articleref := ArticleRef{}
-				articleref.ArticleID = article.Id
-
-				p.ArticleRef = articleref
-			}
-		}
-
 		err = collection.Insert(p)
 		if err != nil {
 			log.Println("Push Save:", err)

@@ -1,7 +1,11 @@
 package pmstructs
 
 import (
+	"encoding/xml"
+	"errors"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
 	"regexp"
 	"time"
@@ -427,6 +431,41 @@ func (a *Article) UpdateShares(db *mgo.Database) {
 			a.Shares = shares
 		}
 	}
+}
+
+func (a *Article) GetArticleFromUrl(host string, id string, db *mgo.Database) error {
+	// Create URL
+	uri := "http://" + host + "/" + id + "?m=mobile"
+
+	// Do the response
+	if len(host) == 0 || len(id) == 0 {
+		return errors.New("No host and ID given correctly.")
+	}
+
+	response, err := http.Get(uri)
+	if err != nil {
+		return errors.New("Could not load URL")
+	}
+
+	defer response.Body.Close()
+
+	// Read contents
+	content, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return errors.New("Could not read body")
+	}
+
+	// Unmarshal article
+	err = xml.Unmarshal(content, &a)
+	if err != nil {
+		return errors.New("Could not unmarshal")
+	}
+
+	a.Id = bson.NewObjectId()
+
+	a.SaveToDB(db)
+
+	return nil
 }
 
 func (a *Article) Update(db *mgo.Database) {
