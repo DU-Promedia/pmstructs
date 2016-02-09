@@ -29,8 +29,9 @@ type Config struct {
 type ConfigSections struct {
 	Name        string           `json:"name"`
 	Url         string           `json:"url"`
-	Type        string           `json:"type"`
-	SectionID   bson.ObjectId    `json:"id" bson:"sectionid,omitempty"`
+	Type        string           `json:"type,omitempty"`
+	SectionID   bson.ObjectId    `json:"id,omitempty" bson:"sectionid,omitempty"`
+	Action      string           `bson:"-" json:"action,omitempty"`
 	Subsections []ConfigSections `json:"subsections" bson:"subsections,omitempty"`
 }
 
