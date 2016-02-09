@@ -2,8 +2,7 @@ package pmstructs
 
 import (
 	"encoding/xml"
-	// "log"
-	//	"net/url"
+	//"log"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -43,10 +42,11 @@ type ArticleContentPlacement struct {
 	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
-	Articles    []struct {
-		Article Article       `xml:"StandardArticle" bson:"-" json:"-"`
-		Simple  TeaserArticle `xml:"TeaserArticle" bson:"-" json:"-"`
-	} `xml:",any" bson:"-" json:"-"`
+	Articles    []Article     `xml:"StandardArticle" bson:"-" json:"-"`
+	// Articles []struct {
+	// 	Article Article       `xml:"StandardArticle" bson:"-" json:"-"`
+	// 	Simple  TeaserArticle `xml:"TeaserArticle" bson:"-" json:"-"`
+	// } `xml:"StandardArticle"`
 }
 
 type ArticleStatisticsList struct {
@@ -73,7 +73,6 @@ func (list *ArticleContentPlacement) Save(db *mgo.Database) {
 	common.Origin = list.Origin
 	common.Type = list.Type
 	common.ArticleList = list.ArticleList
-	//common.Articles = list.Articles
 
 	common.Save(db)
 }
@@ -82,43 +81,16 @@ func (list *ArticleContentPlacement) SaveToDB(db *mgo.Database) {
 	// Save to db
 	list.Save(db)
 
-	i := 0
-
 	list.ArticleList = []ArticleRef{}
 
-	for _, list_a := range list.Articles {
-		i++
+	for _, a := range list.Articles {
+		a.SaveToDB(db)
 
-		if len(list_a.Article.OriginID) > 0 {
-			a := list_a.Article
-			a.SaveToDB(db)
+		artRef := ArticleRef{}
+		artRef.ArticleID = a.Id
+		list.ArticleList = append(list.ArticleList, artRef)
 
-			artRef := ArticleRef{}
-			artRef.ArticleID = a.Id
-			list.ArticleList = append(list.ArticleList, artRef)
-
-			a.SaveToDB(db)
-		} else if len(list_a.Simple.Title) > 0 {
-			a := Article{}
-			b := list_a.Simple
-
-			a.OriginID = b.OriginID
-			a.Teaser = ArticleTeaser{
-				b.Image,
-				"",
-				b.Title,
-				b.Body,
-				b.Link,
-			}
-
-			a.SaveToDB(db)
-
-			artRef := ArticleRef{}
-			artRef.ArticleID = a.Id
-			list.ArticleList = append(list.ArticleList, artRef)
-
-			a.SaveToDB(db)
-		}
+		a.SaveToDB(db)
 	}
 
 	list.Save(db)

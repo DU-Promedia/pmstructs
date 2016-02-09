@@ -1,8 +1,12 @@
 package pmstructs
 
 import (
-	"log"
+	// "encoding/json"
+	// "log"
+	"time"
 
+	"github.com/simplereach/timeutils"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -10,36 +14,91 @@ import (
  * Obituary list for importing
  */
 type ObituaryImportList struct {
-	List []ObituaryImport `json:"Hits"`
+	Hits []ObituaryImportItem
 }
 
-func (o *ObituaryImportList) Save() {
-	for _, item := range o.List {
-		log.Println(item.OriginID)
-	}
+type ObituaryImportItem struct {
+	Id        bson.ObjectId `bson:"_id,omitempty"`
+	Origin    string        `bson:"origin"`
+	OriginId  int           `bson:"originid" json:"Id"`
+	Newspaper struct {
+		Id        int    `bson:"id" json:"Id"`
+		Name      string `bson:"name" json:"Name"`
+		Shortname string `bson:"shortname" json:"ShortName"`
+		Url       string `bson:"url" json:"Url"`
+	} `bson:"-" json:"Newspaper"`
+	Category struct {
+		Name string `bson:"name" json:"Name"`
+	} `bson:"category" json:"Category"`
+	ValidFromRaw timeutils.Time `bson:"-" json:"ValidFrom"`
+	ValidToRaw   timeutils.Time `bson:"-" json:"ValidTo"`
+	ValidFrom    time.Time      `bson:"validfrom"`
+	ValidTo      time.Time      `bson:"validto"`
+	Headline     string         `bson:"headline" json:"Headline"`
+	Images       struct {
+		ThumbUrl  string `bson:"thumb"`
+		MediumUrl string `bson:"medium"`
+		LargeUrl  string `bson:"large"`
+	} `bson:"images"`
+	ExternalAd    bool   `bson:"externalad"`
+	HasVideo      bool   `bson:"hasvideo"`
+	CanonicalUrl  string `bson:"canonicalurl"`
+	ClientViewUrl string `bson:"clientviewurl"`
+	CandelsCount  int    `bson:"candelscount"`
+	MemoriesCount int    `bson:"memoriescount"`
 }
 
-/*
- * Obituary entity for importing
- */
-type ObituaryImport struct {
-	ID            bson.ObjectId  `bson:"_id,omitempty" json:"mid"`
-	OriginID      string         `bson:"originid" json:"id"`
-	Newspaper     string         `bson:"newspaper_name" json:"Newspaper>Name"`
-	NewspaperUrl  string         `bson:"newspaper_url" json:"Newspaper>Url"`
-	Category      string         `bson:"category" json:"Category>Name"`
-	County        string         `bson:"county" json:"County>Name"`
-	City          string         `bson:"city" json:"County>City>Name"`
-	ValidFromRaw  string         `bson:"-" json:"ValidFrom"`
-	ValidToRaw    string         `bson:"-" json:"ValidTo"`
-	Headline      string         `bson:"headline" json:"Headline"`
-	Images        ObituaryImages `bson:"images" json:"Images"`
-	CanonicalUrl  string         `bson:"canonical" json:"CanonicalUrl"`
-	ClientviewUrl string         `bson:"clientviewurl" json:"ClientViewUrl"`
+type ObituaryItem struct {
+	Id       bson.ObjectId `bson:"_id,omitempty" json:"mid"`
+	Origin   string        `bson:"origin" json:"origin"`
+	OriginId int           `bson:"originid" json:"originid"`
 }
 
-type ObituaryImages struct {
-	Thumb  string `bson:"thumb" json:"ThumbUrl"`
-	Medium string `bson:"medium" json:"MediumUrl"`
-	Large  string `bson:"large" json:"LargeUrl"`
+func (o *ObituaryImportItem) Save(db *mgo.Database) {
+	collection := db.C("obituaries")
+
+	o.ValidFrom = o.ValidFromRaw.Time
+	o.ValidTo = o.ValidToRaw.Time
+
+	find := bson.M{"originid": o.OriginId}
+	collection.Upsert(find, o)
 }
+
+// type ObituaryItem struct {
+// 	Id        bson.ObjectId `bson:"_id,omitempty" json:"mid"`
+// 	OriginId  int           `json:"Id"`
+// 	Newspaper struct {
+// 		Id        int    `json:"Id"`
+// 		Name      string `json:"Name"`
+// 		Shortname string `json:"ShortName"`
+// 		Url       string `json:"Url"`
+// 	} `json:"Newspaper"`
+// 	Category struct {
+// 		Name string `json:"Name"`
+// 	} `json:"Category"`
+// 	ValidFrom string `json:"ValidFrom"`
+// 	ValidTo   string `json:"ValidTo"`
+// 	Headline  string `json:"Headline"`
+// 	Images    struct {
+// 		ThumbUrl  string
+// 		MediumUrl string
+// 		LargeUrl  string
+// 	}
+// 	ExternalAd    bool
+// 	HasVideo      bool
+// 	CanonicalUrl  string
+// 	ClientViewUrl string
+// 	CandelsCount  int
+// 	MemoriesCount int
+// }
+
+// func (o *ObituaryItem) UnmarshalJSON(b []byte) error {
+// 	abc := ObituaryImportItem{}
+
+// 	err := json.Unmarshal(b, &abc)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+
+// 	return err
+// }
