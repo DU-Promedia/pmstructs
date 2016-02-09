@@ -63,7 +63,37 @@ type Article struct {
 	TopContent      string             `xml:"HandeMadeTopContent" bson:"topcontent" json:"topcontent,omitempty"`
 	Shares          ArticleShares      `bson:"shares" json:"shares,omitempty"`                                               // OUT
 	Serie           ArticleSerie       `xml:"StandardArticleArticleSeries>ArticleSerie" bson:"serie" json:"serie,omitempty"` // OUT
+	Poll            ArticlePoll        `xml:"WebPolls>WebPoll" bson:"poll" json:"poll,omitempty"`                            // OUT
 	//Sections        []ArticleSection   `bson:"sections" json:"sections,omitempty"`
+}
+
+/*
+ * Webpoll
+ */
+type ArticlePoll struct {
+	PollId         string `xml:"id,attrr" bson:"pollid" json:"pollid,omitempty"`
+	RefId          string `xml:"refId,attr" bson:"refid" json:"refid,omitempty"`
+	ContentId      string `xml:"contentId,attr" bson:"contentid" json:"contentid,omitempty"`
+	Header         string `xml:"Header" bson:"header" json:"contentid,omitempty"`
+	Question       string `xml:"Question" bson:"question" json:"question,omitempty"`
+	TotalVoteCount int    `xml:"TotalVoteCount" bson:"totalvotecount" json:"totalvotecount,omitempty"`
+	InActive       bool   `xml:"InActive" bson:"inactive" json:"inactive,omitempty"`
+	Options        []struct {
+		Id     string `xml:"id,attr" bson:"id" json:"id,omitempty"`
+		RefId  string `xml:"refId,attr" bson:"refid" json:"refid,omitempty"`
+		Label  string `xml:"Label" bson:"label" json:"label,omitempty"`
+		Weight int    `xml:"Weight" bson:"weight" json:"weight,omitempty"`
+	} `xml:"Options>Option" bson:"options" json:"options,omitempty"`
+	Results []struct {
+		Id            string  `xml:"Id" bson:"id" json:"id,omitempty"`
+		Label         string  `xml:"Label" bson:"label" json:"label,omitempty"`
+		Weight        int     `xml:"Weight" bson:"weight" json:"weight,omitempty"`
+		Offset        int     `xml:"Offset" bson:"offset" json:"offset,omitempty"`
+		PercentageInt int     `xml:"PercentageInt" bson:"percentageint" json:"percentageint,omitempty"`
+		Value         int     `xml:"Value" bson:"value" json:"value,omitempty"`
+		Percentage    float32 `xml:"Percentage" bson:"percentage" json:"percentage,omitempty"`
+		RawValue      int     `xml:"RawValue" bson:"rawvalue" json:"rawvalue,omitempty"`
+	} `xml:"Results>Result" bson:"results" json:"results,omitempty"`
 }
 
 /*
