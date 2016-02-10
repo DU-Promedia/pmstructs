@@ -71,7 +71,7 @@ type Article struct {
  * Webpoll
  */
 type ArticlePoll struct {
-	PollId         string `xml:"id,attrr" bson:"pollid" json:"pollid,omitempty"`
+	PollId         string `xml:"id,attr" bson:"pollid" json:"pollid,omitempty"`
 	RefId          string `xml:"refId,attr" bson:"refid" json:"refid,omitempty"`
 	ContentId      string `xml:"contentId,attr" bson:"contentid" json:"id,omitempty"`
 	Header         string `xml:"Header" bson:"header" json:"header,omitempty"`
