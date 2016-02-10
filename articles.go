@@ -73,8 +73,8 @@ type Article struct {
 type ArticlePoll struct {
 	PollId         string `xml:"id,attrr" bson:"pollid" json:"pollid,omitempty"`
 	RefId          string `xml:"refId,attr" bson:"refid" json:"refid,omitempty"`
-	ContentId      string `xml:"contentId,attr" bson:"contentid" json:"contentid,omitempty"`
-	Header         string `xml:"Header" bson:"header" json:"contentid,omitempty"`
+	ContentId      string `xml:"contentId,attr" bson:"contentid" json:"id,omitempty"`
+	Header         string `xml:"Header" bson:"header" json:"header,omitempty"`
 	Question       string `xml:"Question" bson:"question" json:"question,omitempty"`
 	TotalVoteCount int    `xml:"TotalVoteCount" bson:"totalvotecount" json:"totalvotecount,omitempty"`
 	InActive       bool   `xml:"InActive" bson:"inactive" json:"inactive,omitempty"`
