@@ -23,6 +23,7 @@ type Config struct {
 	Origin       string           `json:"origin" bson:"originhost"`
 	PrimaryColor string           `json:"primarycolor" bson:"primarycolor"`
 	SectionID    bson.ObjectId    `bson:"sectionid,omitempty" json:"-"`
+	PushTags     []ConfigPushTags `bson:"push_tags" json:"push_tags"`
 	Sections     []ConfigSections `json:"sections"`
 }
 
@@ -33,6 +34,11 @@ type ConfigSections struct {
 	SectionID   bson.ObjectId    `json:"id,omitempty" bson:"sectionid,omitempty"`
 	Action      string           `bson:"-" json:"action,omitempty"`
 	Subsections []ConfigSections `json:"subsections" bson:"subsections,omitempty"`
+}
+
+type ConfigPushTags struct {
+	Name  string `json:"name" bson:"name"`
+	Title string `json:"title" bson:"title"`
 }
 
 func (c *Config) GetSections() []ConfigSections {
