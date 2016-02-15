@@ -5,7 +5,7 @@ import (
 	// "log"
 	"time"
 
-	"github.com/simplereach/timeutils"
+	//"github.com/simplereach/timeutils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -30,12 +30,12 @@ type ObituaryImportItem struct {
 	Category struct {
 		Name string `bson:"name" json:"Name"`
 	} `bson:"category" json:"Category"`
-	ValidFromRaw timeutils.Time `bson:"-" json:"ValidFrom"`
-	ValidToRaw   timeutils.Time `bson:"-" json:"ValidTo"`
-	ValidFrom    time.Time      `bson:"validfrom"`
-	ValidTo      time.Time      `bson:"validto"`
-	Headline     string         `bson:"headline" json:"Headline"`
-	Images       struct {
+	ValidFromRaw time.Time `bson:"-" json:"ValidFrom"`
+	ValidToRaw   time.Time `bson:"-" json:"ValidTo"`
+	// ValidFrom    time.Time      `bson:"validfrom"`
+	// ValidTo      time.Time      `bson:"validto"`
+	Headline string `bson:"headline" json:"Headline"`
+	Images   struct {
 		ThumbUrl  string `bson:"thumb"`
 		MediumUrl string `bson:"medium"`
 		LargeUrl  string `bson:"large"`
@@ -57,8 +57,8 @@ type ObituaryItem struct {
 func (o *ObituaryImportItem) Save(db *mgo.Database) {
 	collection := db.C("obituaries")
 
-	o.ValidFrom = o.ValidFromRaw.Time
-	o.ValidTo = o.ValidToRaw.Time
+	// o.ValidFrom = o.ValidFromRaw.Time
+	// o.ValidTo = o.ValidToRaw.Time
 
 	find := bson.M{"originid": o.OriginId}
 	collection.Upsert(find, o)
