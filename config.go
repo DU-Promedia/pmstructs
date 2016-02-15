@@ -32,7 +32,7 @@ type ConfigSections struct {
 	Url         string           `json:"url"`
 	Type        string           `json:"type,omitempty"`
 	SectionID   bson.ObjectId    `json:"id,omitempty" bson:"sectionid,omitempty"`
-	Icon        string           `bson:"-" json:"icon"`
+	Icon        string           `bson:"-" json:"icon,omitempty"`
 	Action      string           `bson:"-" json:"action,omitempty"`
 	Subsections []ConfigSections `json:"subsections" bson:"subsections,omitempty"`
 }
