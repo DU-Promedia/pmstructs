@@ -91,6 +91,10 @@ func (list *ArticleContentPlacement) SaveToDB(db *mgo.Database) {
 		list.ArticleList = append(list.ArticleList, artRef)
 
 		a.SaveToDB(db)
+
+		if len(a.Serie.Articles) > 0 {
+			a.Serie.TrigUpdateOfSiblings(db)
+		}
 	}
 
 	list.Save(db)
@@ -130,6 +134,10 @@ func (list *ArticleList) SaveToDB(db *mgo.Database) {
 			list.ArticleList = append(list.ArticleList, artRef)
 
 			a.SaveToDB(db)
+
+			if len(a.Serie.Articles) > 0 {
+				a.Serie.TrigUpdateOfSiblings(db)
+			}
 		} else if len(list_a.Simple.Title) > 0 {
 			a := Article{}
 			b := list_a.Simple
@@ -191,6 +199,10 @@ func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
 			list.ArticleList = append(list.ArticleList, artRef)
 
 			a.SaveToDB(db)
+
+			if len(a.Serie.Articles) > 0 {
+				a.Serie.TrigUpdateOfSiblings(db)
+			}
 		} else if len(list_a.Simple.Title) > 0 {
 			a := Article{}
 			b := list_a.Simple

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	//"sync"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -104,6 +105,24 @@ type ArticleSerie struct {
 	Articles []ArticleSerieArticle `xml:"Articles>Article" bson:"articles" json:"articles,omitempty"`
 }
 
+func (a *ArticleSerie) TrigUpdateOfSiblings(db *mgo.Database) {
+	// var wg sync.WaitGroup
+	// wg.Add(len(a.Articles))
+
+	// for _, art := range a.Articles {
+	// 	log.Println("Updating sibling ...", art.OriginID)
+
+	// 	go func(a ArticleSerieArticle) {
+	// 		a.UpdateFromSource(db)
+
+	// 		wg.Done()
+	// 	}(art)
+	// }
+
+	// log.Println("TrigUpdateOfSiblings Waiting ...")
+	// wg.Wait()
+}
+
 type ArticleSerieArticle struct {
 	OriginID   string    `bson:"originid" json:"id"`
 	Title      string    `xml:"Title" bson:"title" json:"title,omitempty"`
@@ -116,6 +135,31 @@ type ArticleSerieArticle struct {
 	Internal   bool      `xml:"Internal" bson:"internal" json:"internal,omitempty"`
 }
 
+func (a *ArticleSerieArticle) UpdateFromSource(db *mgo.Database) {
+
+	if len(a.OriginID) == 0 {
+		return
+	}
+
+	parsed, err := url.Parse(a.Link)
+	if err != nil {
+		log.Println("ArticleSerieArticle UpdateFromSource:", err)
+		return
+	}
+
+	art := Article{}
+	art.LoadArticleByOriginId(a.OriginID, db)
+	log.Println("UpdateFromSource")
+	err = art.GetArticleFromUrl(parsed.Host, a.OriginID, db)
+	if err != nil {
+		log.Println("UpdateFromSource ERROR:", err)
+		return
+	}
+
+	log.Println("UpdateFromSource DONE!")
+	return
+}
+
 /*
  * Article references used in sections
  */
@@ -123,13 +167,9 @@ type ArticleRef struct {
 	ArticleID bson.ObjectId `bson:"articleid" json:"articleid"`
 }
 
-/* TODO: Fix WebPolls from XML
-type ArticlePoll struct {
-}
-
 /*
  * Saving Article Ref and shares
-*/
+ */
 
 type ArticleShares struct {
 	Id        bson.ObjectId `bson:"_id,omitempty" json:"id,omitempty"`
@@ -333,62 +373,16 @@ func (a *Article) SaveToDB(db *mgo.Database) {
 		}
 	}
 
-	// if len(a.Id) > 0 {
-	// 	// Find sections with article in it
-	// 	findSections := bson.M{"articlelist": bson.M{"$elemMatch": bson.M{"articleid": a.Id}}}
-	// 	sects := []ArticleListCommon{}
-
-	// 	err = sectCol.Find(findSections).All(&sects)
-	// 	if err != nil {
-	// 		log.Println("Article SaveToDB: Found no sections:", err)
-	// 	} else {
-	// 		// Reset sections, janitor should remove old articles
-	// 		a.Sections = []ArticleSection{}
-
-	// 		// Loop sections
-	// 		for _, s := range sects {
-	// 			// Create new Article sections and set section id as reference
-	// 			aSect := ArticleSection{}
-	// 			aSect.SectionID = s.ID
-
-	// 			// Loop all articles in sections article list
-	// 			for placement, sp := range s.ArticleList {
-	// 				// Check if sections article list have the article
-	// 				if sp.ArticleID.String() == a.Id.String() {
-	// 					aSect.Placement = placement
-	// 					break
-	// 				}
-	// 			}
-
-	// 			a.Sections = append(a.Sections, aSect)
-	// 		}
-	// 	}
-	// }
-
-	// Parse body!
-	// rr := strings.NewReader(a.Body)
-	// doc, err := goquery.NewDocumentFromReader(rr)
-	// if err != nil {
-	// 	log.Println("Could not read article body")
-	// } else {
-	// 	bodyParts := []string{}
-	// 	doc.Find("p").Each(func(i int, s *goquery.Selection) {
-	// 		html, _ := s.Html()
-	// 		bodyParts = append(bodyParts, html)
-	// 	})
-
-	// 	if len(bodyParts) > 0 {
-	// 		a.BodyParts = bodyParts
-	// 	}
-	// }
-
 	if err = collection.Update(docToUpdate, a); err != nil {
 		log.Println("Article SaveToDB: Could not update:", err)
 		return
 	}
 
 	collection.Find(docToUpdate).One(&a)
+
 	go a.UpdateShares(db)
+
+	return
 }
 
 func (a *Article) LoadArticleById(id bson.ObjectId, db *mgo.Database) bool {
@@ -472,6 +466,8 @@ func (a *Article) GetArticleFromUrl(host string, id string, db *mgo.Database) er
 		return errors.New("No host and ID given correctly.")
 	}
 
+	time.Sleep(50 * time.Millisecond)
+
 	response, err := http.Get(uri)
 	if err != nil {
 		return errors.New("Could not load URL")
@@ -479,10 +475,19 @@ func (a *Article) GetArticleFromUrl(host string, id string, db *mgo.Database) er
 
 	defer response.Body.Close()
 
+	if response.StatusCode != 200 {
+		log.Println("Source did not answer correclty. " + response.Status)
+		return errors.New("HTTP Error: " + response.Status)
+	}
+
 	// Read contents
 	content, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return errors.New("Could not read body")
+	}
+
+	if a.Id.Valid() == false {
+		a.Id = bson.NewObjectId()
 	}
 
 	// Unmarshal article
@@ -490,8 +495,6 @@ func (a *Article) GetArticleFromUrl(host string, id string, db *mgo.Database) er
 	if err != nil {
 		return errors.New("Could not unmarshal")
 	}
-
-	a.Id = bson.NewObjectId()
 
 	a.SaveToDB(db)
 
