@@ -33,6 +33,7 @@ type Article struct {
 	BodyParts       []string           `bson:"contentparts,omitempty" json:"contentparts,omitempty"`
 	Image           string             `xml:"StandardArticleImage>StandardArticleImagePath" json:"image,omitempty" bson:"image"`
 	ImageByline     string             `xml:"StandardArticleImage>StandardArticlePhotographer" json:"imagebyline,omitempty" bson:"imagebyline"`
+	ImageText       string             `xml:"StandardArticleImage>StandardArticleImageText" json:"imagetext,omitempty" bson:"imagetext"`
 	ArticleImages   []ArticleImage     `xml:"ArticleImages>ArticleImage" json:"articleimages,omitempty" bson:"articleimages"`
 	ImageAlbum      ArticleImageAlbum  `xml:"StandardArticleTopImageAlbum>ImageAlbum" json:"imagealbum,omitempty" bson:"imagealbum"`
 	Category        string             `xml:"StandardArticleCategory" json:"category,omitempty"` // OUT
