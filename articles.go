@@ -54,7 +54,7 @@ type Article struct {
 	CommentCount    int                `bson:"commentcount,omitempty" json:"commentcount"`
 	CommentsEnabled bool               `xml:"StandardArticleArticleCommentsEnabled" json:"commentsenabled"`
 	CommentsTitle   string             `xml:"StandardArticleArticleComments>DiscusstionTitle" json:"commenttitle,omitempty"`
-	Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments,omitempty"`
+	Comments        []ArticleComments  `xml:"StandardArticleArticleComments>StandardArticleArticleComment" json:"comments"`
 	Facts           []ArticleFact      `xml:"StandardArticleFacts>StandardArticleFact" json:"facts,omitempty"`
 	BackgroundFacts []ArticleFact      `xml:"StandardArticleBackgroundFacts>StandardArticleBackgroundFact" json:"backgroundfacts,omitempty"`
 	Theme           string             `xml:"StandardArticleTheme" json:"-" bson:"theme"`
