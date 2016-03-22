@@ -403,6 +403,40 @@ func (a *Article) LoadArticleById(id bson.ObjectId, db *mgo.Database) bool {
 	return true
 }
 
+func (a *Article) UpdateFromSource(db *mgo.Database) {
+
+	if len(a.OriginSource) == 0 || len(a.OriginID) == 0 {
+		log.Println("No source or originID given for", a.OriginalLink)
+		return
+	}
+
+	uri := "http://" + a.OriginSource + "/" + a.OriginID + "?m=mobile"
+	response, err := http.Get(uri)
+	if err != nil {
+		log.Println("LoadArticleFromUri:", err)
+		return
+	}
+
+	defer response.Body.Close()
+
+	// Read contents of response
+	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Printf("Error reading %q", uri)
+		return
+	}
+
+	article := Article{}
+
+	err = xml.Unmarshal(contents, &article)
+	if err != nil {
+		log.Println("No unmarshal could be done:", err)
+		return
+	}
+
+	article.SaveToDB(db)
+}
+
 func (a *Article) LoadArticleByOriginId(id string, db *mgo.Database) bool {
 	if len(id) == 0 {
 		log.Println("No valid ID")
