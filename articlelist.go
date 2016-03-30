@@ -28,6 +28,8 @@ func (a *ArticleListCommon) Save(db *mgo.Database) {
 		return
 	}
 
+	log.Println("Saving common list:", a.Url)
+
 	coll := db.C("sections")
 
 	findQuery := bson.M{"url": a.Url}

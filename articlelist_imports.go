@@ -2,6 +2,7 @@ package pmstructs
 
 import (
 	"encoding/xml"
+	"time"
 	//"log"
 
 	"gopkg.in/mgo.v2"
@@ -87,6 +88,22 @@ func (list *ArticleContentPlacement) SaveToDB(db *mgo.Database) {
 	list.ArticleList = []ArticleRef{}
 
 	for _, a := range list.Articles {
+		/* Fix dates as importer doesnt work */
+		a.LastMod = time.Now()
+		if len(a.PubdateRaw) > 0 {
+			a.Pubdate, _ = time.Parse(time.RFC1123Z, a.PubdateRaw)
+			a.PubdateRaw = ""
+		}
+
+		if len(a.ModdateRaw) > 0 {
+			a.Moddate, _ = time.Parse(time.RFC1123Z, a.ModdateRaw)
+			a.ModdateRaw = ""
+		}
+
+		if a.Moddate.Before(a.Pubdate) {
+			a.Moddate = a.Pubdate
+		}
+
 		a.SaveToDB(db)
 
 		artRef := ArticleRef{}
@@ -130,14 +147,31 @@ func (list *ArticleList) SaveToDB(db *mgo.Database) {
 
 		if len(list_a.Article.OriginID) > 0 {
 			a := list_a.Article
+
+			/* Fix dates as importer doesnt work */
+			a.LastMod = time.Now()
+			if len(a.PubdateRaw) > 0 {
+				a.Pubdate, _ = time.Parse(time.RFC1123Z, a.PubdateRaw)
+				a.PubdateRaw = ""
+			}
+
+			if len(a.ModdateRaw) > 0 {
+				a.Moddate, _ = time.Parse(time.RFC1123Z, a.ModdateRaw)
+				a.ModdateRaw = ""
+			}
+
+			if a.Moddate.Before(a.Pubdate) {
+				a.Moddate = a.Pubdate
+			}
+
 			a.SaveToDB(db)
 
 			artRef := ArticleRef{}
 			artRef.ArticleID = a.Id
 			list.ArticleList = append(list.ArticleList, artRef)
-			list.Articles = append(list.Articles, list_a.Article)
+			list.Articles = append(list.Articles, a)
 
-			a.SaveToDB(db)
+			//a.SaveToDB(db)
 
 			if len(a.Serie.Articles) > 0 {
 				a.Serie.TrigUpdateOfSiblings(db)
@@ -162,7 +196,7 @@ func (list *ArticleList) SaveToDB(db *mgo.Database) {
 			list.ArticleList = append(list.ArticleList, artRef)
 			//list.Articles = append(list.Articles, list_a.Simple)
 
-			a.SaveToDB(db)
+			//a.SaveToDB(db)
 		}
 	}
 
@@ -199,14 +233,31 @@ func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
 
 		if len(list_a.Article.OriginID) > 0 {
 			a := list_a.Article
+
+			/* Fix dates as importer doesnt work */
+			a.LastMod = time.Now()
+			if len(a.PubdateRaw) > 0 {
+				a.Pubdate, _ = time.Parse(time.RFC1123Z, a.PubdateRaw)
+				a.PubdateRaw = ""
+			}
+
+			if len(a.ModdateRaw) > 0 {
+				a.Moddate, _ = time.Parse(time.RFC1123Z, a.ModdateRaw)
+				a.ModdateRaw = ""
+			}
+
+			if a.Moddate.Before(a.Pubdate) {
+				a.Moddate = a.Pubdate
+			}
+
 			a.SaveToDB(db)
 
 			artRef := ArticleRef{}
 			artRef.ArticleID = a.Id
 			list.ArticleList = append(list.ArticleList, artRef)
-			list.Articles = append(list.Articles, list_a.Article)
+			list.Articles = append(list.Articles, a)
 
-			a.SaveToDB(db)
+			//a.SaveToDB(db)
 
 			if len(a.Serie.Articles) > 0 {
 				a.Serie.TrigUpdateOfSiblings(db)
