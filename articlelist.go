@@ -18,7 +18,7 @@ type ArticleListCommon struct {
 	OriginApp   string        `bson:"originapp" json:"-"`
 	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
-	Articles    []Article     `json:"articles,omitempty" bson:"-"`
+	Articles    []Article     `json:"articles" bson:"articles"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"-"`
 }
 
@@ -59,6 +59,10 @@ func (a *ArticleListCommon) Save(db *mgo.Database) {
 
 		if len(a.OriginID) == 0 && len(savedList.OriginID) > 0 {
 			a.OriginID = savedList.OriginID
+		}
+
+		if len(a.Articles) == 0 && len(savedList.Articles) > 0 {
+			a.Articles = savedList.Articles
 		}
 
 		_, err = coll.Upsert(findQuery, a)

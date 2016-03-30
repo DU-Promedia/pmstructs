@@ -28,7 +28,8 @@ type ArticleList struct {
 	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
-	Articles    []struct {
+	Articles    []Article     `bson:"-" json:"-"`
+	AllArticles []struct {
 		Article Article       `xml:"StandardArticle" bson:"-" json:"-"`
 		Simple  TeaserArticle `xml:"TeaserArticle" bson:"-" json:"-"`
 	} `xml:"MobileContentBlock" bson:"-" json:"-"`
@@ -57,7 +58,8 @@ type ArticleStatisticsList struct {
 	Type        string        `bson:"type" json:"type"`
 	Url         string        `json:"url" bson:"url"`
 	ArticleList []ArticleRef  `bson:"articlelist" json:"articlelist"`
-	Articles    []struct {
+	Articles    []Article     `bson:"-" json:"-"`
+	AllArticles []struct {
 		Article Article       `xml:"StandardArticle" bson:"-" json:"-"`
 		Simple  TeaserArticle `xml:"TeaserArticle" bson:"-" json:"-"`
 	} `xml:"List>ListItem" bson:"-" json:"-"`
@@ -73,6 +75,7 @@ func (list *ArticleContentPlacement) Save(db *mgo.Database) {
 	common.Origin = list.Origin
 	common.Type = list.Type
 	common.ArticleList = list.ArticleList
+	common.Articles = list.Articles
 
 	common.Save(db)
 }
@@ -110,7 +113,7 @@ func (list *ArticleList) Save(db *mgo.Database) {
 	common.Origin = list.Origin
 	common.Type = list.Type
 	common.ArticleList = list.ArticleList
-	//common.Articles = list.Articles
+	common.Articles = list.Articles
 
 	common.Save(db)
 }
@@ -122,7 +125,7 @@ func (list *ArticleList) SaveToDB(db *mgo.Database) {
 
 	list.ArticleList = []ArticleRef{}
 
-	for _, list_a := range list.Articles {
+	for _, list_a := range list.AllArticles {
 		i++
 
 		if len(list_a.Article.OriginID) > 0 {
@@ -132,6 +135,7 @@ func (list *ArticleList) SaveToDB(db *mgo.Database) {
 			artRef := ArticleRef{}
 			artRef.ArticleID = a.Id
 			list.ArticleList = append(list.ArticleList, artRef)
+			list.Articles = append(list.Articles, list_a.Article)
 
 			a.SaveToDB(db)
 
@@ -156,10 +160,13 @@ func (list *ArticleList) SaveToDB(db *mgo.Database) {
 			artRef := ArticleRef{}
 			artRef.ArticleID = a.Id
 			list.ArticleList = append(list.ArticleList, artRef)
+			//list.Articles = append(list.Articles, list_a.Simple)
 
 			a.SaveToDB(db)
 		}
 	}
+
+	// Save to cache
 
 	list.Save(db)
 }
@@ -174,7 +181,7 @@ func (list *ArticleStatisticsList) Save(db *mgo.Database) {
 	common.Origin = list.Origin
 	common.Type = list.Type
 	common.ArticleList = list.ArticleList
-	//common.Articles = list.Articles
+	common.Articles = list.Articles
 
 	common.Save(db)
 }
@@ -187,7 +194,7 @@ func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
 
 	list.ArticleList = []ArticleRef{}
 
-	for _, list_a := range list.Articles {
+	for _, list_a := range list.AllArticles {
 		i++
 
 		if len(list_a.Article.OriginID) > 0 {
@@ -197,6 +204,7 @@ func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
 			artRef := ArticleRef{}
 			artRef.ArticleID = a.Id
 			list.ArticleList = append(list.ArticleList, artRef)
+			list.Articles = append(list.Articles, list_a.Article)
 
 			a.SaveToDB(db)
 
@@ -221,6 +229,7 @@ func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
 			artRef := ArticleRef{}
 			artRef.ArticleID = a.Id
 			list.ArticleList = append(list.ArticleList, artRef)
+			//list.Articles = append(list.Articles, list_a.Simple)
 
 			a.SaveToDB(db)
 		}
