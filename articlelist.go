@@ -67,6 +67,10 @@ func (a *ArticleListCommon) Save(db *mgo.Database) {
 			a.Articles = savedList.Articles
 		}
 
+		for _, art := range a.Articles {
+			art.UpdateShares(db)
+		}
+
 		_, err = coll.Upsert(findQuery, a)
 		//err = coll.Update(findQuery, a)
 		if err != nil {
