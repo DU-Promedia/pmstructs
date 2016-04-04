@@ -22,6 +22,10 @@ type User struct {
 }
 
 func (u *User) Get(id string, db *mgo.Database) bool {
+	if db.Session == nil {
+		return false
+	}
+
 	c := db.C("users")
 
 	if bson.IsObjectIdHex(id) {
