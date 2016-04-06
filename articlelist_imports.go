@@ -83,7 +83,7 @@ func (list *ArticleContentPlacement) Save(db *mgo.Database) {
 
 func (list *ArticleContentPlacement) SaveToDB(db *mgo.Database) {
 	// Save to db
-	list.Save(db)
+	//list.Save(db)
 
 	list.ArticleList = []ArticleRef{}
 
@@ -136,7 +136,7 @@ func (list *ArticleList) Save(db *mgo.Database) {
 }
 
 func (list *ArticleList) SaveToDB(db *mgo.Database) {
-	list.Save(db)
+	//list.Save(db)
 
 	i := 0
 
@@ -222,7 +222,7 @@ func (list *ArticleStatisticsList) Save(db *mgo.Database) {
 
 func (list *ArticleStatisticsList) SaveToDB(db *mgo.Database) {
 	// Save section
-	list.Save(db)
+	//list.Save(db)
 
 	i := 0
 
